@@ -175,7 +175,7 @@ namespace LugaPasal.Controllers
                                             .Take(pageSize)
                                             .ToListAsync();
 
-            int totalProducts = await dbContext.Products.CountAsync();
+            int totalProducts = await usersQuery.CountAsync();
             int totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
 
             ViewBag.CurrentPage = page;

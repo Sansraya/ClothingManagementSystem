@@ -209,7 +209,7 @@ namespace LugaPasal.Controllers
                 userRating = userRating + (pro.Ratings != null && pro.Ratings.Any() ? pro.Ratings.Average(p => p.RatingValue) : 0.0);
 
             }
-            var rating = userRating / product.Count();
+            var rating = product.Count() > 0 ? userRating / product.Count() : 0.0;
             if (user != null)
             {
                 var profileModel = new ProfileViewModel
