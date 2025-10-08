@@ -1,0 +1,76 @@
+﻿@model LugaPasal.Models.PostProductModel
+
+<div class="container w-50 mt-5">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-header bg-dark text-white text-center rounded-top-4">
+            <h2 class="mb-0">✏️ Edit Product</h2>
+        </div>
+        <div class="card-body p-4">
+            <form asp-action="EditProduct" asp-controller="Product" method="post" enctype="multipart/form-data">
+                <input type="hidden" asp-for="ProductID" />
+
+                <!-- Product Name -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Product Name</label>
+                    <input class="form-control form-control-lg rounded-3" type="text" asp-for="ProductName" />
+                    <span asp-validation-for="ProductName" class="text-danger small"></span>
+                </div>
+
+                <!-- Product Description -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Product Description</label>
+                    <textarea class="form-control rounded-3" rows="3" asp-for="ProductDescription"></textarea>
+                    <span asp-validation-for="ProductDescription" class="text-danger small"></span>
+                </div>
+
+                <!-- Product Price -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Product Price (Rs)</label>
+                    <input class="form-control rounded-3" type="number" asp-for="ProductPrice" />
+                    <span asp-validation-for="ProductPrice" class="text-danger small"></span>
+                </div>
+
+                <!-- Product Quantity -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Product Quantity</label>
+                    <input class="form-control rounded-3" type="number" asp-for="ProductQuantity" />
+                    <span asp-validation-for="ProductQuantity" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold"> Product Category </label>
+                    <select class="form-control" asp-for="ProductCategory">
+                        <option value="Hoodie"> Hoodie </option>
+                        <option value="Shorts"> Shorts </option>
+                        <option value="Pants"> Pants </option>
+                        <option value="Bags"> Bags </option>
+                        <option value="Shirts"> Shirts </option>
+                        <option value="Clothes"> Clothes </option>
+                    </select>
+                </div>
+
+                <!-- Product Image -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Product Image</label>
+                    <input class="form-control rounded-3" type="file" asp-for="ProductImage" />
+                    <span asp-validation-for="ProductImage" class="text-danger small"></span>
+                </div>
+
+                <!-- Submit -->
+
+                <div class="d-flex justify-content-end gap-3 mt-4">
+                    <a asp-action="ProductProfile" asp-controller="Product" asp-route-id="@Model.ProductID"
+                       class="btn btn-danger px-4 py-2 rounded-4 shadow-sm fw-semibold">
+                        ← Back
+                    </a>
+                    <button type="submit"
+                            class="btn btn-dark px-4 py-2 rounded-4 shadow-sm fw-semibold"
+                            onclick="return confirm('Are you sure the information is correct?');">
+                        Save Changes
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,146 @@
+﻿@using LugaPasal.Entities
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<User> userManager
+@model LugaPasal.Models.ProductProfileModel
+
+@{
+    User? user = null;
+    bool IsAdmin = false;
+    if (User?.Identity?.IsAuthenticated == true)
+    {
+        user = await userManager.GetUserAsync(User);
+        if (user != null)
+        {
+            IsAdmin = await userManager.IsInRoleAsync(user, "Admin");
+        }
+    }
+
+
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row g-4 align-items-start p-4">
+
+    <!-- Left: Product Image -->
+    <div class="col-md-6">
+        <img src="@( !string.IsNullOrEmpty(Model.product.ProductImagePath)
+                                                                                                        ? Model.product.ProductImagePath
+                                                                                                        : Url.Content("~/images/icons/default.jpg") )"
+                                                                                                                                                     class="img-fluid rounded"
+                                                                                                                                                     style="height:600px; width:100%; object-fit:contain;" />
+                                                                                                                                            </div>
+
+    <!-- Right: Product Details -->
+    <div class="col-md-6 d-flex flex-column justify-content-between p-4 bg-light rounded shadow-sm h-100 border">
+        <div>
+            <h2 class="fw-bold mb-3 text-uppercase border-bottom pb-2" style="letter-spacing:1px; font-size:2rem;font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
+                @Model.product.ProductName
+            </h2>
+
+            <p class="text-muted border-bottom pb-3 mb-4" style="line-height:1.6; font-size:0.95rem;">
+                @(string.IsNullOrEmpty(Model.product.ProductDescription)
+                               ? "No description provided."
+                               : Model.product.ProductDescription)
+            </p>
+
+            <div class="mb-3 d-flex align-items-center gap-3">
+                <p class="card-text text-black mt-auto text-uppercase" style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">💰 Price: @Model.product.ProductPrice 📦 Quantity: @Model.product.ProductQuantity</p>
+            </div>
+
+            <p class="text-muted small mb-4 border-bottom pb-3">
+                <a asp-controller="User" asp-action="ProfileByOthers" asp-route-id="@Model.product.User.Id" class="text-decoration-none text-muted"> 👤 Posted By: <span class="fw-medium">@Model.product.User</span> </a>
+            </p>
+        </div>
+
+        @if (user != null)
+        {
+            <div class="d-flex justify-content-center ">
+                <a asp-controller="Product" asp-action="AddToCart" asp-route-id="@Model.product.ProductID" class="btn border-1 w-50 text-uppercase shadow-sm mt-3 hover-shadow bg-black text-white " style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height: 20px;"> Add to Cart  </a>
+            </div>
+            if (user.Id == Model.product.User.Id || IsAdmin)
+            {
+                <div class="d-flex">
+                    <a asp-action="ListProducts" asp-controller="Product" class="btn border w-50 text-uppercase shadow-sm mt-3  hover-shadow" style=" font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height: 20px; background-color:beige;">
+                        ← Back to Products
+                    </a>
+                    <a asp-action="EditProduct" asp-controller="Product" asp-route-id="@Model.product.ProductID" class="btn border w-50 text-uppercase shadow-sm mt-3 hover-shadow" style=" font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height: 20px; background-color:floralwhite"> Edit Product → </a>
+                </div>
+            }
+            else
+            {
+                <a asp-action="ListProducts" asp-controller="Product" class="btn border w-50 text-uppercase shadow-sm mt-3  hover-shadow" style="background-color:beige;">
+                    ← Back to Products
+                </a>
+            }
+        }
+
+    </div>
+
+</div>
+<div class="mt-5 mb-3 ms-5">
+    <h3 class="text-black text-uppercase" style="letter-spacing:0.6px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> You might like this </h3>
+</div>
+<div class="row g-3 ms-3 mb-4">
+@foreach (var product in Model.recommendedProducts)
+{
+   
+        <div class="col col-md-3">
+            <a asp-action="ProductProfile" asp-controller="Product" asp-route-id="@product.ProductID" class="text-decoration-none">
+
+                <div class="card shadow-sm hover-shadow product-card h-100 border-0" style="background-color: #f5f5f5;cursor:pointer;">
+                    <div class="card-header bg-white p-0 text-center">
+                        <img src="@( !string.IsNullOrEmpty(product.ProductImagePath)  ? product.ProductImagePath : Url.Content("~/images/profile/default.png"))"
+                             class="rounded-top w-100" style="height:200px; object-fit:contain" />
+                    </div>
+                    <div class="card-body p-3">
+                        <h6 class="text-black" style="font-size:18px;font-weight:normal;letter-spacing:0.6px;line-height:12px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                            @product.ProductName
+                        </h6>
+                        <p class="card-text text-muted small card-limit">
+                            @(!string.IsNullOrEmpty(product.ProductDescription)
+                                                    ? product.ProductDescription
+                                                    : "No description available")
+                    </p>
+                </div>
+            </div>
+
+            </a>
+        </div>
+   
+}
+</div>
+<style>
+
+    .hover-shadow {
+        transition: all 0.3s ease;
+        border-radius: 12px;
+    }
+
+        .hover-shadow:hover {
+            background-color: #ffffff;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            transform: translateY(-4px);
+        }
+
+    .card-limit {
+        display: -webkit-box;
+        -webkit-line-clamp: 3; /* limit to 3 lines */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>

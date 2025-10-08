@@ -1,0 +1,50 @@
+﻿@model LugaPasal.Models.ProfileViewModel
+
+<h1 class="display-3"> Edit Profile </h1>
+<form asp-action="Edit" asp-controller="User" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="All" class="text-danger"> </div>
+    <div class="mt-2">
+        <input id="profileInput" type="file" asp-for="ProfilePicture" hidden/>
+        <img src="@(string.IsNullOrEmpty(Model.ProfilePicturePath)
+                                      ? Url.Content("~/images/icons/default.jpg")
+                                      : Model.ProfilePicturePath)"
+             class="rounded-circle border border-light shadow-sm"
+             onclick="document.getElementById('profileInput').click();"
+             style="width:120px; height:120px; object-fit:cover; cursor:pointer;" />
+    </div>
+    <div class="mt-2">
+        <label class="form-label"> First Name </label>
+        <input type="text" class="form-control" asp-for="FirstName"/>
+        <span asp-validation-for="FirstName" class="text-danger"> </span>
+    </div>
+    <div class="mt-2">
+        <label class="form-label"> Second Name </label>
+        <input type="text" class="form-control" asp-for="LastName" />
+        <span asp-validation-for="LastName" class="text-danger"> </span>
+    </div>
+    <div class="mt-2">
+        <label class="form-label"> Username </label>
+        <input type="text" class="form-control" asp-for="Username" />
+        <span asp-validation-for="Username" class="text-danger"> </span>
+    </div>
+        <div class="mt-2">
+            <label class="form-label"> Phone </label>
+            <input type="number" class="form-control" asp-for="Phone"/>
+            <span asp-validation-for="Phone" class="text-danger"> </span>
+        </div>
+        <div class="mt-2">
+            <label class="form-label"> Date of Birth </label>
+            <input type="text" class="form-control" asp-for="DateOfBirth"/>
+            <span asp-validation-for="DateOfBirth" class="text-danger"> </span>
+        </div>
+        <div class="mt-2">
+            <label class="form-label"> Email </label>
+            <input type="email" class="form-control" asp-for="Email"/>
+            <span asp-validation-for="Email" class="text-danger"> </span>
+        </div>
+        <div class="mt-2">
+            <button type="submit" class="btn btn-outline-primary"> Submit </button>
+            <a asp-action="Profile" asp-controller="User" class="btn btn-outline-danger"> Back </a>
+        </div>
+    
+</form>
