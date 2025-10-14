@@ -22,5 +22,7 @@ namespace LugaPasal.Entities
         public string ?ProductImagePath { get; set; }
         public string UserId { get; set; } =string.Empty;
         public User User { get; set; } = null!;
+        
+        public ICollection<Ratings>? Ratings { get; set; }
     }
 }

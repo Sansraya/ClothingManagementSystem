@@ -19,7 +19,7 @@
 }
 @if (TempData["SuccessMessage"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="notifications alert alert-success alert-dismissible fade show" role="alert">
         @TempData["SuccessMessage"]
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
@@ -27,7 +27,7 @@
 
 @if (TempData["ErrorMessage"] != null)
 {
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <div class="notifications alert alert-danger alert-dismissible fade show" role="alert">
         @TempData["ErrorMessage"]
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
@@ -36,43 +36,104 @@
 <div class="row g-4 align-items-start p-4">
 
     <!-- Left: Product Image -->
-    <div class="col-md-6">
+    <div class="col-md-6 custom-card">
         <img src="@( !string.IsNullOrEmpty(Model.product.ProductImagePath)
-                                                                                                        ? Model.product.ProductImagePath
-                                                                                                        : Url.Content("~/images/icons/default.jpg") )"
-                                                                                                                                                     class="img-fluid rounded"
-                                                                                                                                                     style="height:600px; width:100%; object-fit:contain;" />
-                                                                                                                                            </div>
+                                                                                                                                ? Model.product.ProductImagePath
+                                                                                                                                : Url.Content("~/images/icons/default.jpg") )"
+                                                                                                                                                                             class="zoom-image img-fluid rounded"
+                                                                                                                                                                             style="height:600px; width:100%; object-fit:contain;" />
+                                                                                                                                                                    </div>
 
     <!-- Right: Product Details -->
     <div class="col-md-6 d-flex flex-column justify-content-between p-4 bg-light rounded shadow-sm h-100 border">
         <div>
+            <div class="d-flex gap-5">
             <h2 class="fw-bold mb-3 text-uppercase border-bottom pb-2" style="letter-spacing:1px; font-size:2rem;font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif">
                 @Model.product.ProductName
-            </h2>
+                <a asp-action="AddFavorites" asp-controller="User" asp-route-id="@Model.product.ProductID"> 
+                        <img src="~/images/icons/download.svg" style="margin-bottom:10px;width:40px;height:40px;cursor:pointer"/>
+                </a>
+                </h2>
+            </div>
+           
 
-            <p class="text-muted border-bottom pb-3 mb-4" style="line-height:1.6; font-size:0.95rem;">
-                @(string.IsNullOrEmpty(Model.product.ProductDescription)
-                               ? "No description provided."
-                               : Model.product.ProductDescription)
+            <p class="text-muted border-bottom pb-3 mb-4" style="line-height:1.6;font-size:0.95rem;">
+                @{
+                    if(!string.IsNullOrEmpty(Model.product.ProductDescription))
+                    {
+                        var description = Model.product.ProductDescription.Trim();
+                        var formattedDescription = System.Text.RegularExpressions.Regex.Replace(
+                       description,
+                        @"(?<!^)\s*(\d\.)",
+                        "<br><br>$1"
+                        );
+                        @Html.Raw(formattedDescription)
+
+                    }
+                    else
+                    {
+                        <span> No Description provided </span>
+                    }
+                }
+
             </p>
 
             <div class="mb-3 d-flex align-items-center gap-3">
                 <p class="card-text text-black mt-auto text-uppercase" style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">💰 Price: @Model.product.ProductPrice 📦 Quantity: @Model.product.ProductQuantity</p>
             </div>
+            <div class="mb-4 pb-3 border-bottom">
+                <form asp-action="Ratings" asp-controller="Product" method="post">
+                    <input type="hidden" name="ProductID" value="@Model.product.ProductID" />
+                    @{
+                        var averageRating = Model.product.Ratings != null && Model.product.Ratings.Any()
+                        ? Model.product.Ratings.Average(r => r.RatingValue)
+                        : 0.0;
 
-            <p class="text-muted small mb-4 border-bottom pb-3">
+                        var count = Model.product.Ratings != null && Model.product.Ratings.Any()
+                        ? Model.product.Ratings.Count()
+                        : 0;
+                    }
+                    <div class="d-flex align-items-center">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            string starClass;
+                            if (i <= Math.Floor(averageRating))
+                            {
+                                starClass = "bi bi-star-fill text-warning";
+                            }
+                            else if (i - averageRating < 1)
+                            {
+                                starClass = "bi bi-star-half text-warning";
+                            }
+                            else
+                            {
+                                starClass = "bi bi-star text-warning ";
+                            }
+                            <button type="submit" name="ratingValue" value="@i" class="btn btn-link p-0 me-1 star-btn">
+                                <i class="@starClass " style="font-size:1.5rem;"></i>
+                            </button>
+
+                        }
+                        <span class="ms-2 text-muted"> @averageRating.ToString("0.0")/5 </span> 
+                        <span class="ms-1 text-muted"> (@count) </span>
+                    </div>
+
+                </form>
+            </div>
+
+            <p class="text-muted small">
                 <a asp-controller="User" asp-action="ProfileByOthers" asp-route-id="@Model.product.User.Id" class="text-decoration-none text-muted"> 👤 Posted By: <span class="fw-medium">@Model.product.User</span> </a>
             </p>
         </div>
 
         @if (user != null)
         {
-            <div class="d-flex justify-content-center ">
-                <a asp-controller="Product" asp-action="AddToCart" asp-route-id="@Model.product.ProductID" class="btn border-1 w-50 text-uppercase shadow-sm mt-3 hover-shadow bg-black text-white " style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height: 20px;"> Add to Cart  </a>
-            </div>
+           
             if (user.Id == Model.product.User.Id || IsAdmin)
             {
+                <div class="d-flex justify-content-center ">
+                    <a asp-controller="Product" asp-action="AddToCart" asp-route-id="@Model.product.ProductID" class="btn border-1 w-50 text-uppercase shadow-sm mt-3 hover-shadow bg-black text-white " style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height: 20px;"> Add to Cart  </a>
+                </div>
                 <div class="d-flex">
                     <a asp-action="ListProducts" asp-controller="Product" class="btn border w-50 text-uppercase shadow-sm mt-3  hover-shadow" style=" font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height: 20px; background-color:beige;">
                         ← Back to Products
@@ -82,9 +143,12 @@
             }
             else
             {
-                <a asp-action="ListProducts" asp-controller="Product" class="btn border w-50 text-uppercase shadow-sm mt-3  hover-shadow" style="background-color:beige;">
+                <div class="d-flex justify-content-center" >
+                    <a asp-action="ListProducts" asp-controller="Product" class="btn border w-50 text-uppercase shadow-sm mt-3  hover-shadow" style=" font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height:20px;background-color:beige;">
                     ← Back to Products
                 </a>
+                    <a asp-controller="Product" asp-action="AddToCart" asp-route-id="@Model.product.ProductID" class="btn border-1 w-50 text-uppercase shadow-sm mt-3 hover-shadow bg-black text-white " style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height: 20px;"> Add to Cart  </a>
+                </div>
             }
         }
 
@@ -95,12 +159,12 @@
     <h3 class="text-black text-uppercase" style="letter-spacing:0.6px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> You might like this </h3>
 </div>
 <div class="row g-3 ms-3 mb-4">
-@foreach (var product in Model.recommendedProducts)
-{
-   
+    @foreach (var product in Model.recommendedProducts)
+    {
+
         <div class="col col-md-3">
             <a asp-action="ProductProfile" asp-controller="Product" asp-route-id="@product.ProductID" class="text-decoration-none">
-
+                <div class="hover-shadow">
                 <div class="card shadow-sm hover-shadow product-card h-100 border-0" style="background-color: #f5f5f5;cursor:pointer;">
                     <div class="card-header bg-white p-0 text-center">
                         <img src="@( !string.IsNullOrEmpty(product.ProductImagePath)  ? product.ProductImagePath : Url.Content("~/images/profile/default.png"))"
@@ -116,25 +180,15 @@
                                                     : "No description available")
                     </p>
                 </div>
+                </div>
             </div>
 
             </a>
         </div>
-   
-}
+
+        }
 </div>
 <style>
-
-    .hover-shadow {
-        transition: all 0.3s ease;
-        border-radius: 12px;
-    }
-
-        .hover-shadow:hover {
-            background-color: #ffffff;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            transform: translateY(-4px);
-        }
 
     .card-limit {
         display: -webkit-box;
@@ -143,4 +197,53 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
+
+    .star-btn i:hover,
+    .star-btn i:hover ~ i {
+        color: #ffc107;
+        cursor: pointer;
+    }
+
+    main {
+        flex: 1;
+        margin-bottom: 120px;
+    }
+
+        .custom-footer .bg-white {
+                background-color: #f5f5f5 !important;
+        }
+        .custom-card{
+         position: relative;
+         overflow:hidden;
+         border-radius:12px;
+        cursor: zoom-in;
+        }
+       zoom-image{
+           width:100%;
+           height:auto;
+           transition: transform 0.3s ease, transform-origin 0.3s ease; /* Transform just tells what type of change it is and transform-origin takes the point of zoom */
+           transform-origin:center center; /* This makes it so that the default point of the zoom is the center of image when not hovering*/
+       }
 </style>
+    <script >
+    const zoomContainer= document.querySelectorAll('.custom-card');
+
+    zoomContainer.forEach(container => {
+            const img= container.querySelector('.zoom-image');
+            container.addEventListener('mousemove',(e) => {
+                const rect= container.getBoundingClientRect();   /* Get thte total dimensions of the container on the screen */
+                const x =((e.clientX-rect.left)/rect.width)*100 ;    /* Calculating x and u in percentage */
+                const y= ((e.clientY - rect.top)/rect.height) *100;
+                img.style.transformOrigin=`${x}% ${y}%`;
+                img.style.transform='scale(2)';
+            });
+
+            container.addEventListener('mouseleave' ,() => {
+                img.style.transformOrigin="center center";
+                img.style.transform='scale(1)';
+            });
+    });
+    </script>
+
+
+    

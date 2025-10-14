@@ -45,21 +45,24 @@
     {
         <div class="col-md-3">
             <a asp-action="ProductProfile" asp-controller="Product" asp-route-id="@product.ProductID" class="text-decoration-none">
+                <div class="hover-shadow shadow-sm border-0 " style="border-radius:0.75rem;">
+                    <div class="card product-card " style="cursor:pointer;">
 
-                <div class="card shadow-sm hover-shadow product-card h-100 border-0" style="cursor:pointer;">
-                    <div class="card-header bg-white p-0 text-center">
-                        <img src="@( !string.IsNullOrEmpty(product.ProductImagePath)  ? product.ProductImagePath : Url.Content("~/images/profile/default.png"))"
-                             class="rounded-top w-100" style="height:200px; object-fit:contain" />
-                </div>
- <div class="card-body p-3">
-    <h6 class="text-black" style="font-size:18px;font-weight:normal;letter-spacing:0.6px;line-height:12px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
- @product.ProductName
-  </h6>
-  <p class="card-text text-muted small card-limit">
-                           @(!string.IsNullOrEmpty(product.ProductDescription)
-                                                   ? product.ProductDescription
-                                                   : "No description available")
-                    </p>
+                        <div class="card-header bg-white p-0 text-center">
+                            <img src="@( !string.IsNullOrEmpty(product.ProductImagePath)  ? product.ProductImagePath : Url.Content("~/images/profile/default.png"))"
+                                 class="rounded-top w-100" style="height:200px; object-fit:contain" />
+
+                        </div>
+                        <div class="card-body p-3">
+                            <h6 class="text-black text-truncate w-100" style="font-size:18px;font-weight:normal;letter-spacing:0.6px;line-height:22px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                                @product.ProductName
+                            </h6>
+                            <p class="card-text text-muted small card-limit">
+                                @(!string.IsNullOrEmpty(product.ProductDescription)
+                                                            ? product.ProductDescription
+                                                            : "No description available")
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -72,83 +75,147 @@
     style="letter-spacing:3px; font-family:'Roboto Condensed', sans-serif; color:#555; margin-top:5rem;">
     Categories
 </h3>
-<div class="row g-4 mt-3">
+<div class="row g-4 mt-3 mb-5">
     <div class="col-12 col-md-3">
-        <form asp-action="ListProducts" asp-controller="Product" method="post" class="d-inline">
+        <form asp-action="ListProducts" asp-controller="Product" method="get" class="d-inline">
             <input type="hidden" value="Hoodie" name="category" />
             <button type="submit"
                     style="all: unset; cursor: pointer; width: 100%;">
-                <div class="card border-0 shadow-sm hover-shadow bg-white rounded-4 text-center p-2 ">
-                    <img src="~/images/profiles/986d5927-53b4-424b-bfe2-8f4fb8cb0f08.jpg"
-                         alt="Hoodie"
-                         class="rounded-3 w-100 mb-2"
-                         style="height:200px; object-fit:contain;">
-                    <div class="text-center">
-                        <span class="text-dark text-uppercase d-inline-block" style="letter-spacing:1px;">Hoodie</span>
+                <div class="hover-shadow">
+                    <div class="card border-0 shadow-sm  bg-white rounded-4 text-center p-2 ">
+                        <img src="~/images/profiles/986d5927-53b4-424b-bfe2-8f4fb8cb0f08.jpg"
+                             alt="Hoodie"
+                             class="rounded-3 w-100 mb-2"
+                             style="height:200px; object-fit:contain;">
+                        <div class="text-center">
+                            <span class="text-dark text-uppercase d-inline-block" style="letter-spacing:1px;">Hoodie</span>
+                        </div>
                     </div>
                 </div>
             </button>
         </form>
     </div>
     <div class="col-12 col-md-3">
-        <form asp-action="ListProducts" asp-controller="Product" method="post" class="d-inline">
+        <form asp-action="ListProducts" asp-controller="Product" method="get" class="d-inline">
             <input type="hidden" name="category" value="Shorts" />
             <button type="submit" style="all:unset; cursor:pointer; width:100%;">
-                <div class="card border-0 shadow-sm hover-shadow bg-white rounded-4 text-center p-2 ">
-                    <img src="~/images/profiles/21feadbc-bbfd-496a-a23e-5ec2f01bbfaf.jpg"
-                         alt="Hoodie"
-                         class="rounded-3 w-100 mb-2"
-                         style="height:200px; object-fit:contain;">
-                    <div class="text-center">
-                        <span class="text-dark text-uppercase d-inline-block" style="letter-spacing:1px;">Shorts</span>
+                <div class="hover-shadow">
+                    <div class="card border-0 shadow-sm bg-white rounded-4 text-center p-2 ">
+                        <img src="~/images/profiles/21feadbc-bbfd-496a-a23e-5ec2f01bbfaf.jpg"
+                             alt="Hoodie"
+                             class="rounded-3 w-100 mb-2"
+                             style="height:200px; object-fit:contain;">
+                        <div class="text-center">
+                            <span class="text-dark text-uppercase d-inline-block" style="letter-spacing:1px;">Shorts</span>
+                        </div>
                     </div>
                 </div>
             </button>
         </form>
     </div>
     <div class="col-12 col-md-3">
-        <form asp-action="ListProducts" asp-controller="Product" method="post" class="d-inline">
+        <form asp-action="ListProducts" asp-controller="Product" method="get" class="d-inline">
             <input type="hidden" name="category" value="pants" />
             <button type="submit" style="all:unset;cursor:pointer;width:100%;">
-                <div class="card border-0 shadow-sm hover-shadow bg-white rounded-4 text-center p-2 ">
-                    <img src="~/images/profiles/171d7398-b5d8-418f-91c1-cad41233bea4.jpg"
-                         alt="Hoodie"
-                         class="rounded-3 w-100 mb-2"
-                         style="height:200px; object-fit:contain;">
-                    <div class="text-center">
-                        <span class="text-dark text-uppercase d-inline-block" style="letter-spacing:1px;">Pants</span>
+                <div class="hover-shadow">
+                    <div class="card border-0 shadow-sm  bg-white rounded-4 text-center p-2 ">
+                        <img src="~/images/profiles/171d7398-b5d8-418f-91c1-cad41233bea4.jpg"
+                             alt="Hoodie"
+                             class="rounded-3 w-100 mb-2"
+                             style="height:200px; object-fit:contain;">
+                        <div class="text-center">
+                            <span class="text-dark text-uppercase d-inline-block" style="letter-spacing:1px;">Pants</span>
+                        </div>
                     </div>
                 </div>
             </button>
         </form>
     </div>
     <div class="col-12 col-md-3">
-        <form asp-action="ListProducts" asp-controller="Product" method="post">
+        <form asp-action="ListProducts" asp-controller="Product" method="get">
             <input type="hidden" name="category" value="Bags" />
             <button type="submit" style="all:unset; cursor:pointer;width:100%;">
-                <div class="card border-0 shadow-sm hover-shadow bg-white rounded-4 text-center p-2 ">
-                    <img src="~/images/profiles/2227c1dd-015c-4b8e-8989-a3ff2f2a25c1.jpg"
-                         alt="Hoodie"
-                         class="rounded-3 w-100 mb-2"
-                         style="height:200px; object-fit:contain;">
-                    <div class="text-center">
-                        <span class="text-dark text-uppercase d-inline-block" style="letter-spacing:1px;">Bags</span>
+                <div class="hover-shadow">
+                    <div class="card border-0 shadow-sm  bg-white rounded-4 text-center p-2 ">
+                        <img src="~/images/profiles/2227c1dd-015c-4b8e-8989-a3ff2f2a25c1.jpg"
+                             alt="Hoodie"
+                             class="rounded-3 w-100 mb-2"
+                             style="height:200px; object-fit:contain;">
+                        <div class="text-center">
+                            <span class="text-dark text-uppercase d-inline-block" style="letter-spacing:1px;">Bags</span>
+                        </div>
                     </div>
                 </div>
             </button>
         </form>
     </div>
     <div class="col-12 col-md-3">
-        <form asp-action="ListProducts" asp-controller="Product" method="post">
+        <form asp-action="ListProducts" asp-controller="Product" method="get">
             <input type="hidden" name="category" value="Shirts" />
             <button type="submit" style="all:unset; cursor:pointer;width:100%;">
-                <div class="card border-0 shadow-sm hover-shadow bg-white rounded-4 text-center p-2 ">
-                    <img src="~/images/profiles/639a4cb4-507e-45b0-bc91-633b149b9570.jpg"
-                         alt="Hoodie"
-                         class="rounded-3 w-100 mb-2"
-                         style="height:200px; object-fit:contain;">
-                    <div class="text-center">
-                        <span class="text-dark text-uppercase d-inline-block" style="letter-spacing:1px;">Shirts</span>
+                <div class="hover-shadow">
+                    <div class="card border-0 shadow-sm  bg-white rounded-4 text-center p-2 ">
+                        <img src="~/images/profiles/639a4cb4-507e-45b0-bc91-633b149b9570.jpg"
+                             alt="Hoodie"
+                             class="rounded-3 w-100 mb-2"
+                             style="height:200px; object-fit:contain;">
+                        <div class="text-center">
+                            <span class="text-dark text-uppercase d-inline-block" style="letter-spacing:1px;">Shirts</span>
+                        </div>
+                    </div>
+                </div>
+            </button>
+        </form>
+    </div>
+    <div class="col-12 col-md-3">
+        <form asp-action="ListProducts" asp-controller="Product" method="get">
+            <input type="hidden" name="category" value="Shoes" />
+            <button type="submit" style="all:unset; cursor:pointer;width:100%;">
+                <div class="hover-shadow">
+                    <div class="card border-0 shadow-sm  bg-white rounded-4 text-center p-2 ">
+                        <img src="~/images/profiles/9c9765c3-295c-4725-b1b3-e800843ba1d6.jpg"
+                             alt="Hoodie"
+                             class="rounded-3 w-100 mb-2"
+                             style="height:200px; object-fit:contain;">
+                        <div class="text-center">
+                            <span class="text-dark text-uppercase d-inline-block" style="letter-spacing:1px;">Shoes</span>
+                        </div>
+                    </div>
+                </div>
+            </button>
+        </form>
+    </div>
+    <div class="col-12 col-md-3">
+        <form asp-action="ListProducts" asp-controller="Product" method="get">
+            <input type="hidden" name="category" value="Cardigan" />
+            <button type="submit" style="all:unset; cursor:pointer;width:100%;">
+                <div class="hover-shadow">
+                    <div class="card border-0 shadow-sm  bg-white rounded-4 text-center p-2 ">
+                        <img src="~/images/profiles/635ba454-5e2a-4841-9675-18a70b87218e.jpg"
+                             alt="Hoodie"
+                             class="rounded-3 w-100 mb-2"
+                             style="height:200px; object-fit:contain;">
+                        <div class="text-center">
+                            <span class="text-dark text-uppercase d-inline-block" style="letter-spacing:1px;">Cardigan</span>
+                        </div>
+                    </div>
+                </div>
+            </button>
+        </form>
+    </div>
+    <div class="col-12 col-md-3">
+        <form asp-action="ListProducts" asp-controller="Product" method="get">
+            <input type="hidden" name="category" value="TShirt" />
+            <button type="submit" style="all:unset; cursor:pointer;width:100%;">
+                <div class="hover-shadow">
+                    <div class="card border-0 shadow-sm bg-white rounded-4 text-center p-2 ">
+                        <img src="~/images/profiles/c376f167-5c6d-4365-b27d-dbff0aa24a00.jpg"
+                             alt="Hoodie"
+                             class="rounded-3 w-100 mb-2"
+                             style="height:200px; object-fit:contain;">
+                        <div class="text-center">
+                            <span class="text-dark text-uppercase d-inline-block" style="letter-spacing:1px;">T-Shirt</span>
+                        </div>
                     </div>
                 </div>
             </button>
@@ -162,15 +229,6 @@
     body {
         background-color: #f5f5f5;
     }
-
-    .hover-shadow {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-        .hover-shadow:hover {
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-            transform: translateY(-5px);
-        }
 
     .product-card img {
         object-fit: cover;
@@ -186,8 +244,22 @@
         background-color: #fff;
         border-radius: .75rem;
         box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        opacity: 0;
+        animation: cardPopIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        will-change: transform, box-shadow;
     }
 
+    @@keyframes cardPopIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
 
     .card-limit {
         display: -webkit-box;
@@ -196,5 +268,11 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
+
+    main {
+        margin-bottom: 100px;
+    }
+
+   
 
 </style>

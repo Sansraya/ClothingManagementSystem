@@ -11,8 +11,8 @@ else
     <div class="container-fluid px-3 py-2">
         <div class="row g-4 " style="min-height:100vh;">
             <!-- Filters Column: Extreme Left -->
-            <div class="col-12 col-md-2" >
-                <form method="post" enctype="multipart/form-data" asp-action="ListProducts" asp-controller="Product" class="align-self-start">
+            <div class="col-12 col-md-2">
+                <form method="get" enctype="multipart/form-data" asp-action="ListProducts" asp-controller="Product" class="align-self-start">
                     <div class="card p-3 shadow-sm border-0 rounded-4" style="position: sticky; top:120px; background-color: #fdfdfd;">
                         <h5 class="mb-3 border-bottom pb-2 text-secondary fw-semibold">Filters</h5>
 
@@ -25,7 +25,10 @@ else
                                 <option value="Pants" selected="@(Context.Request.Query["category"] == "Pants")">Pants</option>
                                 <option value="Cardigan" selected="@(Context.Request.Query["category"] == "Cardigan")">Cardigan</option>
                                 <option value="Shorts" selected="@(Context.Request.Query["category"] == "Shorts")">Shorts</option>
-                                <option value="Shorts" selected="@(Context.Request.Query["category"] == "Shirts")">Shirts</option>
+                                <option value="Shirts" selected="@(Context.Request.Query["category"] == "Shirts")">Shirts</option>
+                                <option value="Shoes" selected="@(Context.Request.Query["category"] == "Shoes")">Shoes</option>
+                                <option value="Bags" selected="@(Context.Request.Query["category"] == "Bags")">Bags</option>
+                                <option value="TShirt" selected="@(Context.Request.Query["category"] == "TShirt")">T-Shirt</option>
                             </select>
                         </div>
 
@@ -39,9 +42,18 @@ else
                         </div>
 
                         <!-- Quantity -->
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label class="form-label fw-semibold small text-muted">Min Quantity</label>
                             <input type="number" name="quantity" placeholder="Qty" value="@Context.Request.Query["quantity"]" class="form-control form-control-sm w-100" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small text-muted"> Rating </label>
+                            <select name="rating" id="rating" class="form-select form-select-sm">
+                                <option value="" selected="@(string.IsNullOrEmpty(Context.Request.Query["rating"]))"> None </option>
+                                <option value="lowRated" selected="@(Context.Request.Query["rating"]=="lowRated")"> Sort Low to High </option>
+                                <option value="highRated" selected="@(Context.Request.Query["rating"] == "highRated")"> Sort High to Low </option>
+                            </select>
                         </div>
 
                         <!-- Buttons -->
@@ -61,35 +73,154 @@ else
                     {
                         <div class="col d-flex">
                             <a asp-action="ProductProfile" asp-controller="Product" asp-route-id="@product.ProductID" class="text-decoration-none text-dark">
-                                <div class="card hover-shadow shadow-sm bg-light d-flex flex-column w-100" style="max-height:700px;">
+                                <div class="hover-shadow" style="border-radius:0.75rem;">
+                                <div class="card shadow-sm bg-light d-flex flex-column" style="max-width:300px;">
                                     <div class="card-header bg-white h-100">
                                         <img src="@( !string.IsNullOrEmpty(product.ProductImagePath) ? product.ProductImagePath : Url.Content("~/images/icons/default.jpg") )"
                                              class="card-img-top rounded-2"
                                              style="height:200px; object-fit:contain;" />
                                     </div>
-                                    <div class="card-body d-flex flex-column">
-                                        <h5 class="card-title text-center" style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif">@product.ProductName 
-                                            <span class="badge bg-secondary ms-2 text-uppercase" style="font-size:0.8rem;font-weight: normal; letter-spacing:1px;"> @(string.IsNullOrEmpty(product.ProductCategory) ? "Clothes" : product.ProductCategory) </span> </h5>
+                                    <div class="card-body d-flex flex-column" style="max-height:200px;">
+
+                                        <h5 class="card-title d-flex align-items-center justify-content-center text-center gap-2" style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;max-height:120px; ">
+                                            <span class="text-truncate" style="max-width:70%"> @product.ProductName </span>
+                                            <span class="badge bg-secondary ms-2 text-uppercase" style="font-size:0.8rem;font-weight: normal; letter-spacing:1px;"> @(string.IsNullOrEmpty(product.ProductCategory) ? "Clothes" : product.ProductCategory) </span>
+                                        </h5>
                                         <p class="card-text text-muted card-text-clamp" style="max-height:20rem;">
                                             @( string.IsNullOrEmpty(product.ProductDescription) ? "No description has been provided" : product.ProductDescription )
                                         </p>
                                         <p class="card-text text-black mt-auto" style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">💰 Price: @product.ProductPrice 📦 Quantity: @product.ProductQuantity</p>
+                                        @* @{
+                                            var averageRating = product.Ratings != null && product.Ratings.Any()
+                                            ? product.Ratings.Average(r => r.RatingValue)
+                                            : 0.0;
+                                        }
+                                        <div class="d-flex align-items-center gap-1 ms-5 ">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                string starClass;
+                                                if (i <= Math.Floor(averageRating))
+                                                {
+                                                    starClass = "bi bi-star-fill text-warning";
+                                                }
+                                                else if (i - averageRating < 1)
+                                                {
+                                                    starClass = "bi bi-star-half text-warning";
+                                                }
+                                                else
+                                                {
+                                                    starClass = "bi bi-star text-secondary";
+                                                }
+                                                <i class="@starClass" style="font-size:1rem"> </i>
+                                            }
+                                            <span class="ms-2 text-muted"> @averageRating.ToString("0.0")/5 </span>
+                                        </div> *@
                                     </div>
-                                    <div class="card-footer">
-                                        <p class="card-text small text-muted">👤 Posted By: @product.User.UserName</p>
-                                    </div>
+                                   
+                                        <div class="card-footer">
+                                            <p class="card-text small text-muted">👤 Posted By: @product.User.UserName</p>
+                                        </div>
+                                   
+                                </div>
                                 </div>
                             </a>
                         </div>
                     }
                 </div>
             </div>
+            @if (ViewBag.TotalPages > 1)
+            {
+                <nav aria-label="Product pagination" class="mt-5">
+                    <ul class="pagination justify-content-center flex-wrap rounded-4 py-2 px-3">
+
+                        <!-- Previous Button -->
+                        <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                            <a class="page-link border-0 text-secondary"
+                               asp-action="ListProducts"
+                               asp-route-page="@(ViewBag.CurrentPage - 1)"
+                               asp-route-searchString="@Context.Request.Query["searchString"]"
+                               asp-route-minPrice="@Context.Request.Query["minPrice"]"
+                               asp-route-maxPrice="@Context.Request.Query["maxPrice"]"
+                               asp-route-quantity="@Context.Request.Query["quantity"]"
+                               asp-route-category="@Context.Request.Query["category"]"
+                               asp-route-rating="@Context.Request.Query["rating"]">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+
+                        <!-- Numbered Pages -->
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                                <a class="page-link border-0 fw-semibold @(ViewBag.CurrentPage == i ? "text-white bg-dark" : "text-secondary")"
+                                   style="border-radius: 8px;"
+                                   asp-action="ListProducts"
+                                   asp-route-page="@i"
+                                   asp-route-searchString="@Context.Request.Query["searchString"]"
+                                   asp-route-minPrice="@Context.Request.Query["minPrice"]"
+                                   asp-route-maxPrice="@Context.Request.Query["maxPrice"]"
+                                   asp-route-quantity="@Context.Request.Query["quantity"]"
+                                   asp-route-category="@Context.Request.Query["category"]"
+                                   asp-route-rating="@Context.Request.Query["rating"]">
+                                    @i
+                                </a>
+                            </li>
+                        }
+
+                        <!-- Next Button -->
+                        <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                            <a class="page-link border-0 text-secondary"
+                               asp-action="ListProducts"
+                               asp-route-page="@(ViewBag.CurrentPage + 1)"
+                               asp-route-searchString="@Context.Request.Query["searchString"]"
+                               asp-route-minPrice="@Context.Request.Query["minPrice"]"
+                               asp-route-maxPrice="@Context.Request.Query["maxPrice"]"
+                               asp-route-quantity="@Context.Request.Query["quantity"]"
+                               asp-route-category="@Context.Request.Query["category"]"
+                               asp-route-rating="@Context.Request.Query["rating"]">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+
         </div>
+       
     </div>
 
 }
 
 <style>
+   
+
+
+    .pagination .page-item .page-link {
+        color: #555;
+        border-radius: 10px;
+        margin: 0 4px;
+        transition: all 0.2s ease-in-out;
+        font-size: 0.95rem;
+    }
+
+
+        .pagination .page-item .page-link:hover {
+            background-color: #212529;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+    .pagination .page-item.active .page-link {
+        background-color: #212529 !important;
+        border-color: transparent;
+        color: #fff !important;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
     body > div.container {
         max-width: 100% !important;
         padding-left: 3rem !important;
@@ -115,13 +246,4 @@ else
         overflow: hidden;
         text-overflow: ellipsis;
     }
-
-    .hover-shadow {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-        .hover-shadow:hover {
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-            transform: translateY(-5px);
-        }
 </style>

@@ -7,6 +7,8 @@
                     ? new List<Cart>()
                     : JsonSerializer.Deserialize<List<Cart>>(sessionCart);
     var cartCount = cart.Sum(c => c.Quantity);
+
+    var role = ViewContext.HttpContext.Session.GetString("Role");
 }
 
 
@@ -23,9 +25,9 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3 fixed-top">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Luga Pasal</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AestheticX</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -33,39 +35,63 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark text-uppercase nav-bar-text-left" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="ListProducts">Browse</a>
+                            <a class="nav-link text-dark text-uppercase nav-bar-text-left" asp-area="" asp-controller="Product" asp-action="ListProducts">Browse</a>
                         </li>
 
-                        <form asp-action="ListProductsFromSearch" asp-controller="Product" method="get" class="d-flex w-50 ms-5">
-                            <input type="text" name="searchString" class="form-control" value="@Context.Request.Query["searchString"]" placeholder="Search Products" />
+                        <form asp-action="ListProducts" asp-controller="Product" method="get" class="d-flex w-75 ms-5" style="border-radius:19px/50%;">
+                            <input type="text" name="searchString" style="font-size:13px;border-radius: 19px / 50%;letter-spacing: .4px;  " class="form-control" value="@Context.Request.Query["searchString"]" placeholder="Search for items and products" />
                             <button type="submit" class="btn">
                                 🔍
                             </button>
                         </form>
 
                     </ul>
-                    <ul class="navbar-nav flex-row-reverse">
+                    <ul class="navbar-nav flex-row-reverse ">
                         @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
 
-                            <li class="nav-item d-flex align-items-center">
+                            <li class="nav-item">
                                 <a class="nav-link text-dark d-flex align-items-center" asp-action="Profile" asp-controller="User">
                                     <img class="rounded-circle me-1"
                                          style="width:30px; height:30px; object-fit:cover;"
                                          src="~/images/icons/default.jpg" />
-                                    @User.Identity.Name
+                                    <span style="font-family: 'Poppins', sans-serif; font-weight:400; font-size:0.9rem"> @User.Identity.Name </span>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark align-items-center" asp-action="PostProduct" asp-controller="Product">Post Product | </a>
+                            <li class="nav-item mx-1 mt-2">
+                                <span class="text-secondary">|</span>
                             </li>
-                            <li class="nav-item d-flex align-items-center me-3">
+                            <li class="nav-item mx-1">
+                                <a class="nav-link text-dark text-uppercase nav-bar-text" asp-action="PostProduct" asp-controller="Product">Post Product</a>
+                            </li>
+                            <li class="nav-item mx-1 mt-2">
+                                <span class="text-secondary">|</span>
+                            </li>
+                            <li class="nav-item mx-1">
+                                <a class="nav-link text-dark text-uppercase nav-bar-text" asp-action="Favorites" asp-controller="User">Favorites</a>
+                            </li>
+                            <li class="nav-item mx-1 mt-2">
+                                <span class="text-secondary">|</span>
+                            </li>
+                            @if (role == "Admin")
+                            {
+                                <li class="nav-item mx-1">
+                                    <a class="nav-link text-dark text-uppercase nav-bar-text" asp-action="Dashboard" asp-controller="User">Dashboard</a>
+                                </li>
+                                <li class="nav-item mx-1 mt-2">
+                                    <span class="text-secondary">|</span>
+                                </li>
+                            }
+
+
+
+                            <li class="nav-item mx-3 mt-1">
                                 <a class="nav-link text-dark position-relative" asp-controller="Product" asp-action="Cart">
-                                    <i class="bi bi-cart3" style="font-size: 1rem;"> </i>
-                                    <span class="position-absolute top-1 start-100 translate-middle badge rounded-pill bg-danger">
+                                    <i class="bi bi-cart3" style="font-size: 1rem;"></i>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                         @cartCount
                                     </span>
                                 </a>
@@ -74,10 +100,10 @@
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Register">Register</a>
+                                <a class="nav-link text-dark text-uppercase nav-bar-text-left" asp-area="" asp-controller="User" asp-action="Register">Register</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Login">Login</a>
+                                <a class="nav-link text-dark text-uppercase nav-bar-text-left" asp-area="" asp-controller="User" asp-action="Login">Login</a>
                             </li>
                         }
                     </ul>
@@ -91,14 +117,162 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - E_CommercePlatform - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="custom-footer border-top">
+        <div class="bg-white py-4">
+            <div class="container text-center text-md-start">
+                <div class="row">
+                    <div class="col-12 col-md-4 mb-2 mb-md-0">
+                        <span class="text-uppercase" style="letter-spacing:0.6px;">Quick Links</span>
+                        <div class="d-flex flex-column text-decoration-none">
+                            <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted small"> Home </a>
+                            <a asp-controller="Product" asp-action="ListProducts" class="text-decoration-none text-muted small"> Products </a>
+                            <a asp-controller="User" asp-action="Register" class="text-decoration-none text-muted small"> Register </a>
+                            <a asp-controller="User" asp-action="Login" class="text-decoration-none text-muted small"> Login </a>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4 mb-2 mb-md-0">
+                        <span class="text-uppercase" style="letter-spacing:0.6px;">Products</span>
+                        <div class="d-flex flex-column">
+                            <form asp-action="ListProducts" asp-controller="Product" method="get">
+                                <input type="hidden" name="category" value="Hoodie" />
+                                <button type="submit" style="all:unset;">
+                                    <span class="text-muted small" style="cursor:pointer;"> Hoodie </span>
+                                </button>
+                            </form>
+                            <form asp-action="ListProducts" asp-controller="Product" method="get">
+                                <input type="hidden" name="category" value="Shirts" />
+                                <button type="submit" style="all:unset;">
+                                    <span class="text-muted small" style="cursor:pointer;"> Shirts </span>
+                                </button>
+                            </form>
+                            <form asp-action="ListProducts" asp-controller="Product" method="get">
+                                <input type="hidden" name="category" value="Pants" />
+                                <button type="submit" style="all:unset;">
+                                    <span class="text-muted small" style="cursor:pointer;"> Pants </span>
+                                </button>
+                            </form>
+                            <form asp-action="ListProducts" asp-controller="Product" method="get">
+                                <input type="hidden" name="category" value="Bags" />
+                                <button type="submit" style="all:unset;">
+                                    <span class="text-muted small" style="cursor:pointer;"> Bags </span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4 mb-2 mb-md-0">
+                        <span class="text-uppercase" style="letter-spacing:0.6px;">Contact Us</span>
+                        <div class="d-flex flex-column">
+                            <div class="d-flex gap-1">
+                                <a href="www.instagram.com"><img src="~/images/icons/facebook.png" class="footer-social-icon" /></a>
+                                <a href="www.twitter.com"><img src="~/images/icons/twitter.png" class="footer-social-icon" /></a>
+                                <a href="www.instagram.com"><img src="~/images/icons/instagram.png" class="footer-social-icon" /></a>
+                                <a href="www.daraz.com"><img src="~/images/icons/daraz.png" class="footer-social-icon" /></a>
+                                <a href="www.youtube.com"><img src="~/images/icons/youtube.png" class="footer-social-icon" /></a>
+
+                            </div>
+                            <div class="d-flex mt-4 gap-2">
+                                <a href="www.appstore.com"><img src="~/images/icons/appstore.png" /></a>
+                                <a href="www.googlestore.com"><img src="~/images/icons/googlestore.png" /></a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-12 text-center">
+                        <span class="text-muted">&copy; AestheticX 2025 - All Rights Reserved </span>
+
+
+                    </div>
+                </div>
+            </div>
         </div>
     </footer>
+
+
+
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+<style>
+    html, body {
+        height: 100%;
+    }
+
+    .navbar {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        z-index: 1050;
+    }
+
+    body {
+        padding-top: 100px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .navbar-brand {
+        padding-left: 10px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 1.5rem;
+        letter-spacing: 0.5px;
+        color: #222;
+        text-transform: uppercase;
+    }
+
+    .nav-bar-text {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+        font-size: 0.8rem;
+        padding-bottom: 1px;
+        margin-top: 0.25rem;
+    }
+
+    .nav-bar-text-left {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+        font-size: 0.8rem;
+        padding-bottom: 1px;
+    }
+
+    .navbar-nav {
+        margin-left: 10px;
+    }
+
+    main {
+        flex: 1;
+    }
+
+    .container {
+        flex: 1 0 auto; /* Grows to fill space, doesn't shrink, auto basis */
+    }
+
+    .custom-footer {
+        margin-top: auto;
+        width: 100%;
+        white-space: nowrap;
+        line-height: 30px;
+        background-color: white;
+    }
+
+    .footer-social-icon {
+        width: 35px;
+        height: 35px;
+        transition: 0.3s ease;
+        opacity: 0.9;
+    }
+
+        .footer-social-icon:hover {
+            opacity: 1;
+            transform: translateY(-3px);
+        }
+</style>

@@ -13,5 +13,7 @@ namespace LugaPasal.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<Products> Products { get; set; }
+        public DbSet<Ratings> Ratings { get; set; }
+        public DbSet<Favorites> Favorites { get; set; }
     }
 }

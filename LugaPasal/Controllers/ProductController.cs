@@ -91,23 +91,35 @@ namespace LugaPasal.Controllers
 
 
         }
+        //[HttpGet]
+        //public async Task<IActionResult> ListProducts()
+        //{
+        //    var products = await dbContext.Products
+        //                                  .Include(p => p.User)
+        //                                  .OrderByDescending(p => p.ProductID)
+        //                                  .ToListAsync();
+
+        //    return View(products);
+        //}
+
         [HttpGet]
-        public async Task<IActionResult> ListProducts()
+        public async Task<IActionResult> ListProducts(int page, string? searchString, int? minPrice, int? maxPrice, int? quantity, string? category, string? rating)
         {
-            var products = await dbContext.Products
-                                          .Include(p => p.User)
-                                          .OrderByDescending(p => p.ProductID)
-                                          .ToListAsync();
 
-            return View(products);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> ListProducts(int? minPrice, int? maxPrice, int? quantity, string? category)
-        {
             var usersQuery = dbContext.Products.Include(p => p.User)
+                                                .Include(p => p.Ratings)
                                                 .AsQueryable();
 
+            bool isFiltering = minPrice != null || maxPrice != null || quantity != null || !string.IsNullOrEmpty(searchString) ||
+                       (!string.IsNullOrEmpty(category) && category != "All") ||
+                       (!string.IsNullOrEmpty(rating) && rating != "None");
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                usersQuery = usersQuery.Where(p =>
+                    p.ProductName.Contains(searchString) ||
+                    p.ProductDescription.Contains(searchString));
+            }
             if (minPrice != null)
             {
                 usersQuery = usersQuery.Where(p => p.ProductPrice >= minPrice);
@@ -123,31 +135,56 @@ namespace LugaPasal.Controllers
             if (!string.IsNullOrEmpty(category) && category != "All")
             {
                 usersQuery = usersQuery.Where(p => p.ProductCategory == category);
+
             }
-            var products = await usersQuery.ToListAsync();
+            if (!string.IsNullOrEmpty(rating) && (rating != "None"))
+            {
+                if (rating == "lowRated")
+                {
+                    usersQuery = usersQuery.OrderBy(p => p.Ratings.Any() ? p.Ratings.Average(p => p.RatingValue) : 0);
+                }
+                else if (rating == "highRated")
+                {
+                    usersQuery = usersQuery.OrderByDescending(p => p.Ratings.Any() ? p.Ratings.Average(p => p.RatingValue) : 0);
+                }
+            }
+            else if (!isFiltering)
+            {
+                usersQuery = usersQuery.OrderBy(p => Guid.NewGuid())
+                                        .Distinct();
+
+            }
+            if(page<1)
+            {
+                page = 1;
+            }
+            int pageSize = 12;
+            var products = await usersQuery.Skip((page - 1) * pageSize)
+                                            .Take(pageSize)
+                                            .ToListAsync();
+
+            int totalProducts = await dbContext.Products.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
             return View(products);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ListProductsFromSearch(string searchString)
-        {
-            var productsQuery = dbContext.Products
-                                         .Include(p => p.User)
-                                         .AsQueryable();
+        //[HttpGet]
+        //public async Task<IActionResult> ListProductsFromSearch(string searchString)
+        //{
+        //    var productsQuery = dbContext.Products
+        //                                 .Include(p => p.User)
+        //                                 .AsQueryable();
 
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                productsQuery = productsQuery.Where(p =>
-                    p.ProductName.Contains(searchString) ||
-                    p.ProductDescription.Contains(searchString));
-            }
 
-            var products = await productsQuery
-                                .OrderByDescending(p => p.ProductID)
-                                .ToListAsync();
+        //    var products = await productsQuery
+        //                        .OrderByDescending(p => p.ProductID)
+        //                        .ToListAsync();
 
-            return View("ListProducts", products); // Reuse same view
-        }
+        //    return View("ListProducts", products); // Reuse same view
+        //}
 
 
 
@@ -157,6 +194,7 @@ namespace LugaPasal.Controllers
 
             var foundProduct = await dbContext.Products
                                          .Include(p => p.User)
+                                         .Include(p => p.Ratings)
                                          .FirstOrDefaultAsync(p => p.ProductID == id);
 
 
@@ -172,7 +210,7 @@ namespace LugaPasal.Controllers
             var productModel = new ProductProfileModel
             {
                 product = foundProduct,
-                recommendedProducts=foundRecommendedProducts
+                recommendedProducts = foundRecommendedProducts
             };
             return View(productModel);
         }
@@ -309,7 +347,7 @@ namespace LugaPasal.Controllers
             }
             else
             {
-                TempData["ErrorMessage"] = "Item nto found in the cart";
+                TempData["ErrorMessage"] = "Item not found in the cart";
             }
             return RedirectToAction("Cart", "Product");
         }
@@ -325,6 +363,40 @@ namespace LugaPasal.Controllers
             var users = await usersQuery.ToListAsync();
             return View(users);
         }
+        [HttpPost]
+        public async Task<IActionResult> Ratings(Guid productID, int ratingValue, string? review)
+        {
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "Please Log In First!";
+                return RedirectToAction("Login", "User");
+            }
+            var existingRating = await dbContext.Ratings
+                                                    .FirstOrDefaultAsync(p => p.ProductID == productID && p.UserID == user.Id);
+            if (existingRating != null)
+            {
+                existingRating.RatingValue = ratingValue;
+                existingRating.Review = review;
+                dbContext.Ratings.Update(existingRating);
+            }
+            else
+            {
+                var ratings = new Ratings
+                {
+                    RatingID = Guid.NewGuid(),
+                    ProductID = productID,
+                    UserID = user.Id,
+                    Review = review,
+                    RatingValue = ratingValue
+                };
+                await dbContext.Ratings.AddAsync(ratings);
+
+            }
+            await dbContext.SaveChangesAsync();
+            return RedirectToAction("ProductProfile", new { id = productID });
+        }
+
     }
 }
 

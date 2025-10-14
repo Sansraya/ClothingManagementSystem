@@ -4,6 +4,7 @@ using LugaPasal.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LugaPasal.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251009050931_Adding entity ratings into the database")]
+    partial class Addingentityratingsintothedatabase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,27 +24,6 @@ namespace LugaPasal.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("LugaPasal.Entities.Favorites", b =>
-                {
-                    b.Property<Guid>("FavoritesID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ProductID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("UserID")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("FavoritesID");
-
-                    b.HasIndex("ProductID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("Favorites");
-                });
 
             modelBuilder.Entity("LugaPasal.Entities.Products", b =>
                 {
@@ -316,23 +298,6 @@ namespace LugaPasal.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("LugaPasal.Entities.Favorites", b =>
-                {
-                    b.HasOne("LugaPasal.Entities.Products", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LugaPasal.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("LugaPasal.Entities.Products", b =>

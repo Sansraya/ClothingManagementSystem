@@ -1,11 +1,13 @@
-﻿using LugaPasal.Entities;
+﻿using LugaPasal.Data;
+using LugaPasal.Entities;
 using LugaPasal.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using LugaPasal.Data;
-using Microsoft.AspNetCore.Identity;
+using System.Data;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 
 
 namespace LugaPasal.Controllers
@@ -15,6 +17,7 @@ namespace LugaPasal.Controllers
         private readonly ApplicationDbContext dbContext;
         private readonly UserManager<User> userManager;
         private readonly SignInManager<User> signInManager;
+
 
         public UserController(UserManager<User> userManager, SignInManager<User> signInManager, ApplicationDbContext dbContext)
         {
@@ -99,7 +102,7 @@ namespace LugaPasal.Controllers
                 if (result.Succeeded)
                 {
                     await userManager.AddToRoleAsync(user, "User");
-                    
+
                     return RedirectToAction("Login", "User");
                 }
 
@@ -122,6 +125,17 @@ namespace LugaPasal.Controllers
             var result = await signInManager.PasswordSignInAsync(loginModel.Username, loginModel.Password, loginModel.RememberMe, lockoutOnFailure: false);
             if (result.Succeeded)
             {
+                var user = await userManager.GetUserAsync(User);
+                var role = await userManager.GetRolesAsync(user);
+
+                if (role.Contains("Admin"))
+                {
+                    HttpContext.Session.SetString("Role", "Admin");
+                }
+                else
+                {
+                    HttpContext.Session.SetString("Role", "User");
+                }
                 return RedirectToAction("Index", "Home");
             }
             else
@@ -141,10 +155,18 @@ namespace LugaPasal.Controllers
 
         public async Task<IActionResult> Profile()
         {
-            var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await userManager.FindByIdAsync(userID);
+
+            var user = await userManager.GetUserAsync(User);
             var product = await dbContext.Products.Where(p => p.UserId == user.Id)
+                                                    .Include(p => p.Ratings)
                                                    .ToListAsync();
+            var userRating = 0.0;
+            foreach (var pro in product)
+            {
+                userRating = userRating + (pro.Ratings != null && pro.Ratings.Any() ? pro.Ratings.Average(p => p.RatingValue) : 0.0);
+
+            }
+            var rating = userRating / product.Count();
             if (user != null)
             {
                 var profileModel = new ProfileViewModel
@@ -157,7 +179,8 @@ namespace LugaPasal.Controllers
                     Phone = user.PhoneNumber,
                     DateOfBirth = user.DateOfBirth,
                     ProfilePicturePath = user.ProfilePicturePath,
-                    ProductsOfUser= product
+                    ProductsOfUser = product,
+                    Rating = rating
 
                 };
                 return View(profileModel);
@@ -173,7 +196,15 @@ namespace LugaPasal.Controllers
         {
             var user = await userManager.FindByIdAsync(id);
             var product = await dbContext.Products.Where(p => p.UserId == user.Id)
+                                                  .Include(p => p.Ratings)
                                                   .ToListAsync();
+            var userRating = 0.0;
+            foreach (var pro in product)
+            {
+                userRating = userRating + (pro.Ratings != null && pro.Ratings.Any() ? pro.Ratings.Average(p => p.RatingValue) : 0.0);
+
+            }
+            var rating = userRating / product.Count();
             if (user != null)
             {
                 var profileModel = new ProfileViewModel
@@ -186,7 +217,8 @@ namespace LugaPasal.Controllers
                     Phone = user.PhoneNumber,
                     DateOfBirth = user.DateOfBirth,
                     ProfilePicturePath = user.ProfilePicturePath,
-                    ProductsOfUser = product
+                    ProductsOfUser = product,
+                    Rating = rating
 
                 };
                 return View(profileModel);
@@ -223,8 +255,8 @@ namespace LugaPasal.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(ProfileViewModel profileModel)
         {
-            
-            var existingName = await userManager.Users.FirstOrDefaultAsync(u => u.UserName == profileModel.Username && u.Id!=profileModel.Id);
+
+            var existingName = await userManager.Users.FirstOrDefaultAsync(u => u.UserName == profileModel.Username && u.Id != profileModel.Id);
             if (existingName != null)
             {
                 ModelState.AddModelError("Username", "The username already exists");
@@ -253,12 +285,12 @@ namespace LugaPasal.Controllers
                 return View(profileModel);
             }
 
-            user.FirstName= profileModel.FirstName;
-            user.LastName= profileModel.LastName;
-            user.UserName= profileModel.Username;
-            user.Email= profileModel.Email;
-            user.PhoneNumber= profileModel.Phone;
-            user.DateOfBirth= profileModel.DateOfBirth;
+            user.FirstName = profileModel.FirstName;
+            user.LastName = profileModel.LastName;
+            user.UserName = profileModel.Username;
+            user.Email = profileModel.Email;
+            user.PhoneNumber = profileModel.Phone;
+            user.DateOfBirth = profileModel.DateOfBirth;
             if (profileModel.ProfilePicture != null && profileModel.ProfilePicture.Length > 0)
             {
                 try
@@ -281,24 +313,140 @@ namespace LugaPasal.Controllers
                     return View(profileModel);
                 }
             }
-            
+
             var result = await userManager.UpdateAsync(user);
             if (!result.Succeeded)
             {
-                foreach( var item in result.Errors)
+                foreach (var item in result.Errors)
                 {
                     ModelState.AddModelError("", item.Description);
-                }    
+                }
             }
             else
             {
                 await signInManager.RefreshSignInAsync(user);
-                return RedirectToAction("Profile", "User"); 
+                return RedirectToAction("Profile", "User");
             }
 
             return View(profileModel);
 
         }
 
+        public async Task<IActionResult> AddFavorites(Guid id)
+        {
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "User");
+            }
+
+            var existingFavorite = await dbContext.Favorites.FirstOrDefaultAsync(p => p.UserID == user.Id && p.ProductID == id);
+            if (existingFavorite == null)
+            {
+                var favorite = new Favorites
+                {
+                    FavoritesID = Guid.NewGuid(),
+                    ProductID = id,
+                    UserID = user.Id
+                };
+                await dbContext.Favorites.AddAsync(favorite);
+                await dbContext.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Product added to your favorites.";
+                return RedirectToAction("ProductProfile", "Product", new { id });
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "This product is already inn your favorites.";
+                return RedirectToAction("ProductProfile", "Product", new { id });
+            }
+        }
+        [HttpGet]
+
+        public async Task<IActionResult> Favorites()
+        {
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "User");
+            }
+            var favorites = await dbContext.Favorites
+                .Include(f => f.Product)
+                .Where(f => f.UserID == user.Id)
+                .ToListAsync();
+
+            return View(favorites);
+        }
+
+        public async Task<IActionResult> RemoveFromFavorites(Guid id)
+        {
+            var productToRemove = await dbContext.Favorites.FirstOrDefaultAsync(p => p.ProductID == id);
+            if (productToRemove != null)
+            {
+                dbContext.Favorites.Remove(productToRemove);
+                await dbContext.SaveChangesAsync();
+                TempData["SuccessMessage"] = "The product has been sucessfully removed from favorites";
+                return RedirectToAction("Favorites", "User");
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Unable to remove the product from favorites";
+                return RedirectToAction("favorites", "User");
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Dashboard()
+        {
+            var totalProducts = await dbContext.Products.CountAsync();
+            var productWithReviews = dbContext.Products.Count(p => p.Ratings.Any());
+            var topRatedProductId = dbContext.Ratings.
+                 GroupBy(r => r.ProductID)
+                 .Select(g => new { ProductID = g.Key, AvgRating = g.Average(r => r.RatingValue) })
+                 .OrderByDescending(g => g.AvgRating)
+                 .FirstOrDefault();
+
+                Products topRatedProduct = null;
+
+            if (topRatedProductId != null)
+            {
+                topRatedProduct = dbContext.Products.FirstOrDefault(p => p.ProductID == topRatedProductId.ProductID.Value);
+            }
+            var LowestRatedProductId = dbContext.Ratings.GroupBy(p => p.ProductID)
+                                            .Select(g => new { ProductID = g.Key, AvgRating = g.Average(g => g.RatingValue) })
+                                            .OrderBy( p=> p.AvgRating)
+                                            .FirstOrDefault();
+
+            Products LowestRatedProduct = null;
+            if (LowestRatedProductId != null)
+            {
+                LowestRatedProduct = dbContext.Products.FirstOrDefault(p => p.ProductID == LowestRatedProductId.ProductID.Value);
+            }
+
+
+            var dashboardModel = new DashboardModel
+            {
+                totalUser = await dbContext.Users.CountAsync(),
+                totalProducts = totalProducts,
+                highRatedProducts = dbContext.Ratings.Count(p => p.RatingValue >= 4),
+                categoryCounts = await dbContext.Products
+                               .GroupBy(p => string.IsNullOrEmpty(p.ProductCategory) ? "Uncategorized" : p.ProductCategory)
+                               .ToDictionaryAsync(
+                                   g => g.Key,
+                                   g => g.Count()
+                               ),
+                outOfStock = dbContext.Products.Count(p => p.ProductQuantity == 0),
+                averageRating = dbContext.Ratings.Average(r => r.RatingValue),
+                lowRated = dbContext.Ratings.Count(p => p.RatingValue <= 2),
+                TotalReviews = dbContext.Ratings.Count(p => !string.IsNullOrEmpty(p.Review)),
+                expensiveProducts = dbContext.Products.OrderByDescending(p => p.ProductPrice).Take(5).ToList(),
+                averagePrice = dbContext.Products.Average(p => p.ProductPrice),
+                lowStock = dbContext.Products.Count(p => p.ProductQuantity <= 5),
+                topRatedProduct = topRatedProduct,
+                lowRatedProduct = LowestRatedProduct,
+                productWithReviews = productWithReviews,
+                percentageReview = (double)productWithReviews / totalProducts * 100
+            };
+            return View(dashboardModel);
+        }
     }
 }

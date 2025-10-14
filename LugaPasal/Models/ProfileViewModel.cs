@@ -23,7 +23,6 @@ namespace LugaPasal.Models
         public IFormFile? ProfilePicture { get; set; }
 
         public List<Products> ?ProductsOfUser { get; set; }
-
-
+        public double ?Rating { get; set; }
     }
 }

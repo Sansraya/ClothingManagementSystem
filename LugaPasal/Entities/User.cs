@@ -8,6 +8,7 @@ namespace LugaPasal.Entities
         public required string LastName { get; set; }
         public required DateOnly DateOfBirth { get; set; }
         public string? ProfilePicturePath { get; set; }
+        public ICollection<Ratings>? Ratings { get; set; }
 
     }
 }
