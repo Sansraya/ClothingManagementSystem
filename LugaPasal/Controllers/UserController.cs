@@ -494,7 +494,7 @@ namespace LugaPasal.Controllers
             }
             var ratings = await dbContext.Ratings.FirstOrDefaultAsync(p => p.ProductID == id && p.UserID == user.Id);
             if (ratings != null)
-            { 
+            {
                 ratings.Review = Review;
                 ratings.RatingValue = ratingValue;
                 try
@@ -509,7 +509,7 @@ namespace LugaPasal.Controllers
 
                     TempData["ErrorMessage"] = "Unable to post a review! Please, Try Again!";
                     return View(new ReviewModel { RatingValue = ratingValue, Review = Review, UserID = user.Id, product = product });
-                    }
+                }
             }
             else
             {
@@ -537,5 +537,24 @@ namespace LugaPasal.Controllers
             }
 
         }
-    }
+        public async Task<IActionResult> MyOrders()
+        {
+            var user = await userManager.GetUserAsync(User);
+
+            if(user == null)
+            {
+                TempData["ErrorMessage"]= "Please login in first!";
+                return RedirectToAction("Login", "User");
+            }
+
+            List<Orders> orders = await dbContext.Orders
+                                      .Include(o => o.Product)  
+                                      .Include(o => o.User)     
+                                      .Where(o => o.UserID == user.Id)
+                                      .OrderByDescending(o => o.OrderDate)
+                                      .ToListAsync();
+
+            return View(orders);
+        }
+    }   
 }

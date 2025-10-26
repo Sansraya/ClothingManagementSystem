@@ -154,7 +154,7 @@ namespace LugaPasal.Controllers
                                         .Distinct();
 
             }
-            if(page<1)
+            if (page < 1)
             {
                 page = 1;
             }
@@ -209,8 +209,11 @@ namespace LugaPasal.Controllers
                                                               .ToListAsync();
             var reviews = await dbContext.Ratings.Where(p => p.ProductID == id)
                                                     .Include(p => p.User)
+                                                    .OrderByDescending(r => !string.IsNullOrEmpty(r.Review))
+                                                    .Take(10)
                                                     .ToListAsync();
-                                                    
+
+
             var productModel = new ProductProfileModel
             {
                 product = foundProduct,
@@ -357,6 +360,58 @@ namespace LugaPasal.Controllers
             return RedirectToAction("Cart", "Product");
         }
 
+        public async Task<IActionResult> Checkout()
+        {
+            var sessionCart = HttpContext.Session.GetString("Cart");
+            var user = await userManager.GetUserAsync(User);
+            List<Cart>? cart = JsonSerializer.Deserialize<List<Cart>>(sessionCart);
+            if (cart != null && cart.Any())
+            {
+                try
+                {
+                    foreach (var product in cart)
+                    {
+                        var item = await dbContext.Products.FirstAsync(r=> r.ProductID == product.ProductID);
+                        if (item == null)
+                        {
+                            TempData["ErrorMessage"] = "One or more products in your cart are no longer available.";
+                            return RedirectToAction("Cart", "Product");
+                        }
+                        var order = new Orders
+                        {
+                            OrderId = Guid.NewGuid(),
+                            OrderDate=DateTime.UtcNow,
+                            ProductID = item.ProductID,
+                            UserID = user.Id,
+                            Quantity=product.Quantity,
+                            UnitPrice = item.ProductPrice,
+                            TotalPrice=item.ProductPrice * product.Quantity
+                            
+                        };
+                        item.ProductQuantity = item.ProductQuantity - product.Quantity;
+                        dbContext.Products.Update(item);
+                        await dbContext.Orders.AddAsync(order);
+                    }
+                    await dbContext.SaveChangesAsync();
+                    HttpContext.Session.Remove("Cart");
+                    TempData["SuccessMessage"] = "Your order has been placed successfully!";
+                    return RedirectToAction("ListProducts", "Product");
+                }
+                catch (Exception ex)
+                {
+                    TempData["ErrorMessage"] = "Unable to place order. Please try again!";
+                    return RedirectToAction("Cart", "Product");
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Your cart is empty. Please add items to your cart before checking out.";
+                return RedirectToAction("Cart", "Product");
+            }
+        }
+
+
+
         public async Task<IActionResult> SearchProduct(string searchQuery)
         {
             var usersQuery = dbContext.Products.AsQueryable();
@@ -393,7 +448,7 @@ namespace LugaPasal.Controllers
                     ProductID = productID,
                     UserID = user.Id,
                     Review = review,
-                    RatingValue = ratingValue
+                    RatingValue = ratingValue,
                 };
                 await dbContext.Ratings.AddAsync(ratings);
 

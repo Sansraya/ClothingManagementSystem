@@ -44,7 +44,7 @@
                             </div>
                             <div class="card-body">
                                 <h5 class="card-title fw-semibold">@product.ProductName</h5>
-                                <p class="card-text card-limit text-muted small mb-3">@product.ProductDescription</p>
+                                <p class="card-text card-text-clamp text-muted small mb-3">@product.ProductDescription</p>
                                 <div class="d-flex justify-content-between align-items-center gap-2">
                                 <a asp-action="ProductProfile" asp-controller="Product" asp-route-id="@product.ProductID"
                                        class="btn border w-50 text-uppercase shadow-sm hover-shadow" style=" font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height:20px;background-color:beige;">
@@ -69,13 +69,6 @@
         background-color: #f5f5f5;
     }
 
-    .card-limit {
-        display: -webkit-box;
-        -webkit-line-clamp: 4; /* limit to 3 lines */
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
 
     main {
         margin-bottom: 310px;

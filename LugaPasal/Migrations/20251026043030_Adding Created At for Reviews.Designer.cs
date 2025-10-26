@@ -4,6 +4,7 @@ using LugaPasal.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LugaPasal.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251026043030_Adding Created At for Reviews")]
+    partial class AddingCreatedAtforReviews
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,39 +44,6 @@ namespace LugaPasal.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("Favorites");
-                });
-
-            modelBuilder.Entity("LugaPasal.Entities.Orders", b =>
-                {
-                    b.Property<Guid>("OrderId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("OrderDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("ProductID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("UserID")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("OrderId");
-
-                    b.HasIndex("ProductID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("LugaPasal.Entities.Products", b =>
@@ -361,21 +331,6 @@ namespace LugaPasal.Migrations
                         .HasForeignKey("ProductID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("LugaPasal.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("LugaPasal.Entities.Orders", b =>
-                {
-                    b.HasOne("LugaPasal.Entities.Products", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductID");
 
                     b.HasOne("LugaPasal.Entities.User", "User")
                         .WithMany()

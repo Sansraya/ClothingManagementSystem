@@ -1,0 +1,62 @@
+﻿@model List<LugaPasal.Entities.Orders>
+
+<div class="container my-5">
+    <h1 class="text-uppercase mb-4 text-center fw-semibold  mb-3"
+        style="letter-spacing:4px; font-family:'Gill Sans MT', Calibri, sans-serif;">
+        Previous Orders
+    </h1>
+
+    <div class="row g-4">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var order in Model)
+            {
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <a asp-action="ProductProfile" asp-controller="Product" asp-route-id="@order.ProductID"
+                       class="text-decoration-none text-dark">
+                        <div class="hover-shadow">
+                            <div class="card h-100 shadow-sm border-0 ">
+                                <div class="card-header bg-white h-100">
+                                    <img src="@( !string.IsNullOrEmpty(order.Product.ProductImagePath) ? order.Product.ProductImagePath : Url.Content("~/images/icons/default.jpg") )"
+                                         class="card-img-top rounded-2"
+                                         style="height:200px; object-fit:contain;" />
+                                </div>
+                                <div class="card-body">
+                                    <h6 class="fw-semibold text-truncate"
+                                        style="font-size:17px; letter-spacing:0.5px;">
+                                        @order.Product.ProductName
+                                    </h6>
+
+                                    <div class="text-muted small mt-2">
+                                        <div><i class="bi bi-calendar-date"></i> @order.OrderDate.ToString("MM/dd/yyyy")</div>
+                                        <div><i class="bi bi-box-seam"></i> Quantity: @order.Quantity</div>
+                                        <div><i class="bi bi-cash"></i> Total: Rs. @order.TotalPrice</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="border rounded shadow-sm p-5 text-center bg-white">
+                    <h6 class="text-muted mb-0">No orders to display yet.</h6>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+
+    main {
+        margin-bottom: 30px;
+    }
+
+</style>

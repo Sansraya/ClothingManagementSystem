@@ -177,7 +177,7 @@
                             <h6 class="text-black" style="font-size:18px;font-weight:normal;letter-spacing:0.6px;line-height:12px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
                                 @product.ProductName
                             </h6>
-                            <p class="card-text text-muted small card-limit">
+                            <p class="card-text text-muted small card-text-clamp">
                                 @(!string.IsNullOrEmpty(product.ProductDescription)
                                                             ? product.ProductDescription
                                                             : "No description available")
@@ -210,7 +210,7 @@
                         </div>
                     </div>
                     <div class="col-md-9 col-12">
-                        <div class="d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-center">
                             <div class="d-flex gap-2">
                                 @for (int i = 1; i <= 5; i++)
                                 {
@@ -227,8 +227,13 @@
                                     <i class="@starClass"></i>
 
                                 }
-                                
                             </div>
+                                @if (review.CreatedAt != null)
+                                {
+                                    <span class="text-muted small">@review.CreatedAt.ToString("MM/dd/yyyy")</span>
+                                }
+                            </div>
+                         
                         @if(review.Review!=null)
                             {
                                 <span class="text-black" style="font-weight:400"> @review.Review</span>
@@ -238,10 +243,11 @@
                                 <span class="text-muted"> No description of the review can be found!</span>
                             }
                         </div>
+                        
                     </div>
                 </div>
 
-            </div>
+            @* </div> *@
         }
 
     }
@@ -256,13 +262,7 @@
 </div>
 <style>
 
-    .card-limit {
-        display: -webkit-box;
-        -webkit-line-clamp: 3; /* limit to 3 lines */
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+  
 
     .star-btn i:hover,
     .star-btn i:hover ~ i {

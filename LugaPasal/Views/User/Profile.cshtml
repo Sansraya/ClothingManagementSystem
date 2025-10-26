@@ -78,10 +78,12 @@
 
 
                     <!-- Buttons -->
-                    <div class="d-flex justify-content-between mt-3">
-                        <a class="btn btn-outline-secondary w-45" asp-controller="User" asp-action="Edit" asp-route-Id="@Model.Id">Edit</a>
-                        <a class="btn btn-outline-danger w-45" asp-controller="User" asp-action="Logout">Logout</a>
+                    <div class="d-flex justify-content-center align-items-center gap-4 mt-3">
+                        <a asp-controller="User" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Edit</a>
+                        <a asp-controller="User" asp-action="MyOrders" class="btn btn-outline-dark">My Orders</a>
+                        <a asp-controller="User" asp-action="Logout" class="btn btn-outline-danger">Logout</a>
                     </div>
+
 
                 </div>
             </div>
@@ -109,7 +111,7 @@
                                                                                                                                                                                                                                                                                                                                                                                                      </div>
                                                                                                                                                                                                                                                                                                                                                                                                      <div class="card-body p-3">
                                                                                                                                                                                                                                                                                                                                                                                                          <h6 class="text-dark" style="font-size:18px;font-weight:normal;letter-spacing:0.6px;line-height:12px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">@product.ProductName</h6>
-                                                                                                                                                                                                                                                                                                                                                                                                         <p class="card-text text-muted small card-limit">
+                                                                                                                                                                                                                                                                                                                                                                                                         <p class="card-text text-muted small card-text-clamp">
                                                @(!string.IsNullOrEmpty(product.ProductDescription)
                                                                                        ? product.ProductDescription
                                                                                        : "No description available")
@@ -168,14 +170,6 @@
 
     body {
         background-color: #f5f5f5;
-    }
-
-    .card-limit {
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
 
     .w-45 {

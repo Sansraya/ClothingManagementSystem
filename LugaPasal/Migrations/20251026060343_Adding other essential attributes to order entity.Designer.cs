@@ -4,6 +4,7 @@ using LugaPasal.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LugaPasal.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251026060343_Adding other essential attributes to order entity")]
+    partial class Addingotheressentialattributestoorderentity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,7 +55,7 @@ namespace LugaPasal.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("ProductID")
+                    b.Property<Guid>("ProductID")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Quantity")
@@ -375,7 +378,9 @@ namespace LugaPasal.Migrations
                 {
                     b.HasOne("LugaPasal.Entities.Products", "Product")
                         .WithMany()
-                        .HasForeignKey("ProductID");
+                        .HasForeignKey("ProductID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("LugaPasal.Entities.User", "User")
                         .WithMany()
