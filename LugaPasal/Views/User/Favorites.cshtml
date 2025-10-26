@@ -34,7 +34,7 @@
                 var product = favorite.Product;
                 <div class="col">
                     <div class="hover-shadow">
-                        <div class="card h-100 shadow-sm border-0 rounded-3 ">
+                        <div class="card h-100 shadow-sm border-0 rounded-3 " style="border:none;">
                             <div class="position-relative">
                                 <img src="@product.ProductImagePath" class="card-img-top rounded-top-3" alt="@product.ProductName" style="height: 200px; object-fit: contain;">
                                 <a asp-action="RemoveFromFavorites" asp-controller="User" asp-route-id="@product.ProductID"
@@ -45,10 +45,16 @@
                             <div class="card-body">
                                 <h5 class="card-title fw-semibold">@product.ProductName</h5>
                                 <p class="card-text card-limit text-muted small mb-3">@product.ProductDescription</p>
+                                <div class="d-flex justify-content-between align-items-center gap-2">
                                 <a asp-action="ProductProfile" asp-controller="Product" asp-route-id="@product.ProductID"
-                                   class="btn btn-outline-warning w-100">
+                                       class="btn border w-50 text-uppercase shadow-sm hover-shadow" style=" font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height:20px;background-color:beige;">
                                     View Details
                                 </a>
+                                    <a asp-action="AddToCart" asp-controller="Product" asp-route-id="@product.ProductID"
+                                       class="btn border w-50 text-white text-uppercase shadow-sm hover-shadow" style=" font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height:20px;background-color:black;">
+                                        Add to Cart
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -6,6 +6,8 @@ namespace LugaPasal.Models
     {
        public required LugaPasal.Entities.Products product { get; set; }
         public required List<LugaPasal.Entities.Products> recommendedProducts { get; set; }
+
+        public List<LugaPasal.Entities.Ratings> ?reviews { get; set; }
     }
 }
  

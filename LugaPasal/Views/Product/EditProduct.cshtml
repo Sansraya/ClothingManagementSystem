@@ -1,5 +1,13 @@
 ﻿@model LugaPasal.Models.PostProductModel
 
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="notifications alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 <div class="container w-50 mt-5">
     <div class="card shadow-lg border-0 rounded-4">
         <div class="card-header bg-dark text-white text-center rounded-top-4">

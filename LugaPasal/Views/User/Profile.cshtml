@@ -1,4 +1,13 @@
 ﻿@model LugaPasal.Models.ProfileViewModel
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="notifications alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <div class="container-fluid">
     <div class="row p-4 gx-5">
 
@@ -91,7 +100,7 @@
                         <div class="col-md-4 g-3 p-3">
                             <a asp-action="ProductProfile" asp-controller="Product" asp-route-id="@product.ProductID" class="text-decoration-none text-black">
                                 <div class="hover-shadow">
-                                    <div class="card shadow-sm hover-shadow product-card h-100 border-0" style="cursor:pointer;">
+                                    <div class="card shadow-sm hover-shadow product-card h-100 border-0" style="cursor:pointer;min-height:20rem;">
                                         <div class="card-header bg-white p-0 text-center">
                                             <img src="@( !string.IsNullOrEmpty(product.ProductImagePath)
                                                                                                                                                                                                                                                                                                                                                                 ? product.ProductImagePath

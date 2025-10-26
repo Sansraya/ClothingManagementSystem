@@ -46,7 +46,7 @@
         <div class="col-md-3">
             <a asp-action="ProductProfile" asp-controller="Product" asp-route-id="@product.ProductID" class="text-decoration-none">
                 <div class="hover-shadow shadow-sm border-0 " style="border-radius:0.75rem;">
-                    <div class="card product-card " style="cursor:pointer;">
+                    <div class="card product-card " style="cursor:pointer;min-height:20rem;">
 
                         <div class="card-header bg-white p-0 text-center">
                             <img src="@( !string.IsNullOrEmpty(product.ProductImagePath)  ? product.ProductImagePath : Url.Content("~/images/profile/default.png"))"

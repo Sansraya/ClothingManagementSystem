@@ -191,7 +191,7 @@ namespace LugaPasal.Controllers
         [HttpGet]
         public async Task<IActionResult> ProductProfile(Guid id)
         {
-
+            var user = await userManager.GetUserAsync(User);
             var foundProduct = await dbContext.Products
                                          .Include(p => p.User)
                                          .Include(p => p.Ratings)
@@ -207,10 +207,15 @@ namespace LugaPasal.Controllers
                                                               .OrderBy(p => Guid.NewGuid())
                                                               .Take(4)
                                                               .ToListAsync();
+            var reviews = await dbContext.Ratings.Where(p => p.ProductID == id)
+                                                    .Include(p => p.User)
+                                                    .ToListAsync();
+                                                    
             var productModel = new ProductProfileModel
             {
                 product = foundProduct,
-                recommendedProducts = foundRecommendedProducts
+                recommendedProducts = foundRecommendedProducts,
+                reviews = reviews
             };
             return View(productModel);
         }

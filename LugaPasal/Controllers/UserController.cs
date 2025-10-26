@@ -1,4 +1,5 @@
-﻿using LugaPasal.Data;
+﻿using Humanizer;
+using LugaPasal.Data;
 using LugaPasal.Entities;
 using LugaPasal.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Packaging.Signing;
 using System.Data;
 using System.Security.Claims;
 
@@ -325,6 +327,7 @@ namespace LugaPasal.Controllers
             else
             {
                 await signInManager.RefreshSignInAsync(user);
+                TempData["SuccessMessage"] = "The profile was updated successfully!";
                 return RedirectToAction("Profile", "User");
             }
 
@@ -405,7 +408,7 @@ namespace LugaPasal.Controllers
                  .OrderByDescending(g => g.AvgRating)
                  .FirstOrDefault();
 
-                Products topRatedProduct = null;
+            Products topRatedProduct = null;
 
             if (topRatedProductId != null)
             {
@@ -413,7 +416,7 @@ namespace LugaPasal.Controllers
             }
             var LowestRatedProductId = dbContext.Ratings.GroupBy(p => p.ProductID)
                                             .Select(g => new { ProductID = g.Key, AvgRating = g.Average(g => g.RatingValue) })
-                                            .OrderBy( p=> p.AvgRating)
+                                            .OrderBy(p => p.AvgRating)
                                             .FirstOrDefault();
 
             Products LowestRatedProduct = null;
@@ -447,6 +450,92 @@ namespace LugaPasal.Controllers
                 percentageReview = (double)productWithReviews / totalProducts * 100
             };
             return View(dashboardModel);
+        }
+        [HttpGet]
+        public async Task<IActionResult> PostReview(Guid id)
+        {
+            var product = await dbContext.Products.Include(p => p.Ratings)
+                                                  .FirstOrDefaultAsync(p => p.ProductID == id);
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "You need to be logged in to post a review.";
+                return RedirectToAction("Login", "User");
+            }
+
+            else if (product != null)
+            {
+                var reviewModel = new ReviewModel
+                {
+                    product = product,
+                    RatingValue = product.Ratings.Where(r => r.ProductID == id && r.UserID == user.Id).Any() ? product.Ratings.FirstOrDefault(r => r.ProductID == id && r.UserID == user.Id).RatingValue : 0,
+                    UserID = user.Id,
+                    Review = string.Empty
+
+                };
+                return View(reviewModel);
+            }
+            else
+            {
+                TempData["ErrorMessage"] = " Unable to post a review";
+                return RedirectToAction("ProductProfile", "Product", id);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostReview(string Review, int ratingValue, Guid id)
+        {
+            var product = await dbContext.Products.FirstOrDefaultAsync(p => p.ProductID == id);
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "You need to be logged in to post a review.";
+                return RedirectToAction("Login", "User");
+            }
+            var ratings = await dbContext.Ratings.FirstOrDefaultAsync(p => p.ProductID == id && p.UserID == user.Id);
+            if (ratings != null)
+            { 
+                ratings.Review = Review;
+                ratings.RatingValue = ratingValue;
+                try
+                {
+                    var result = dbContext.Ratings.Update(ratings);
+                    TempData["SuccessMessage"] = "The review has been posted successfully!!";
+                    await dbContext.SaveChangesAsync();
+                    return View(new ReviewModel { RatingValue = ratingValue, Review = Review, UserID = user.Id, product = product });
+                }
+                catch
+                {
+
+                    TempData["ErrorMessage"] = "Unable to post a review! Please, Try Again!";
+                    return View(new ReviewModel { RatingValue = ratingValue, Review = Review, UserID = user.Id, product = product });
+                    }
+            }
+            else
+            {
+                Ratings rating = new Ratings
+                {
+                    RatingID = Guid.NewGuid(),
+                    ProductID = id,
+                    UserID = user.Id,
+                    RatingValue = ratingValue,
+                    Review = Review,
+                };
+                var result = await dbContext.Ratings.AddAsync(rating);
+                if (result != null)
+                {
+                    TempData["SuccessMessage"] = "The review has been posted successfully!!";
+                    await dbContext.SaveChangesAsync();
+                    return View(new ReviewModel { RatingValue = ratingValue, Review = Review, UserID = user.Id, product = product });
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Unable to post a review! Please, Try Again!";
+                    return View(new ReviewModel { RatingValue = ratingValue, Review = Review, UserID = user.Id, product = product });
+                }
+
+            }
+
         }
     }
 }
