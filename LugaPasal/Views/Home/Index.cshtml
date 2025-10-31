@@ -43,7 +43,7 @@
 <div class="row g-4">
     @foreach (var product in Model)
     {
-        <div class="col-md-3">
+        <div class="col-md-3 col-sm-6">
             <a asp-action="ProductProfile" asp-controller="Product" asp-route-id="@product.ProductID" class="text-decoration-none">
                 <div class="hover-shadow shadow-sm border-0 " style="border-radius:0.75rem;">
                     <div class="card product-card " style="cursor:pointer;min-height:20rem;">

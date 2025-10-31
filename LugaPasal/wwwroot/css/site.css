@@ -98,3 +98,54 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* Mobile-first responsive utilities */
+@media (max-width: 576px) {
+    /* Reduce padding on mobile */
+    .container, .container-fluid {
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+    }
+
+    /* Stack navbar items */
+    .navbar-nav {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    /* Adjust card spacing */
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    /* Make images responsive */
+    .card-img-top {
+        max-height: 200px;
+        object-fit: contain;
+    }
+
+    /* Adjust font sizes */
+    h1, h2, h3 {
+        font-size: calc(1.2rem + 0.5vw);
+    }
+}
+
+@media (max-width: 768px) {
+    /* Tablet adjustments */
+    body {
+        padding-top: 140px; /* More space for wrapped navbar */
+    }
+
+    /* Stack profile layout */
+    .profile-container .row {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 992px) {
+    /* Hide some decorative elements on smaller screens */
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+    }
+}

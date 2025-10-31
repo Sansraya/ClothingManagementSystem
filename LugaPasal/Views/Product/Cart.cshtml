@@ -12,21 +12,6 @@
     }
     else
     {
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="notifications alert alert-success alert-dismissible fade show" role="alert">
-                @TempData["SuccessMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
-
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div class="notifications alert alert-danger alert-dismissible fade show" role="alert">
-                @TempData["ErrorMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
         <div class="card list-group shadow-sm rounded">
             @foreach (var product in Model)
             {
@@ -42,7 +27,11 @@
                         <div class="ms-3">
                             <h6 class="mb-1 fw-bold text-dark">@product.ProductName</h6>
                             <p class="mb-0 text-muted small">Rs @product.ProductPrice.ToString("N0")</p>
-                            <p class="mb-0 text-muted small">Qty: @product.Quantity</p>
+                            <div class="d-flex gap-2">
+                                <a class="text-decoration-none text-danger" asp-action="ManipulateQuantity" asp-controller="Product" asp-route-id="@product.ProductID " asp-route-quantityAction="Decrease"><i class="bi bi-dash-circle"> </i></a>
+                                <p class="text-muted small">Quantity : @product.Quantity</p>
+                                <a class="text-decoration-none text-danger" asp-action="ManipulateQuantity" asp-controller="Product" asp-route-id="@product.ProductID" asp-route-quantityAction="Increase"><i class="bi bi-plus-circle"> </i></a>
+                            </div>
                         </div>
                     </div>
 

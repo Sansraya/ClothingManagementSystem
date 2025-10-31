@@ -4,26 +4,13 @@
     <h3 class="mb-4 text-center fw-bold">
         <i class="bi bi-bookmark-heart-fill text-warning me-2"></i> Favorites
     </h3>
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="notifications alert alert-success alert-dismissible fade show m-3" role="alert">
-            @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="notifications alert alert-danger alert-dismissible fade show m-3" role="alert">
-            @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+   
     @if (Model == null || !Model.Any())
     {
         <div class="text-center py-5 text-muted">
             <i class="bi bi-bookmark-x fs-1 d-block mb-3"></i>
             <p>No favorites found yet. Start adding products you love!</p>
-            <a asp-controller="Product" asp-action="Index" class="btn btn-warning px-4">Browse Products</a>
+            <a asp-controller="Product" asp-action="ListProducts" class="btn btn-warning px-4">Browse Products</a>
         </div>
     }
     else

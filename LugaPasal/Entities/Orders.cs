@@ -14,9 +14,9 @@ namespace LugaPasal.Entities
         public Guid ?ProductID { get; set; }
         [ForeignKey("ProductID")]
         public Products Product { get; set; }
-
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal TotalPrice { get; set; }
+        public required string OrderStatus { get; set; } = "Pending";
     }
 }

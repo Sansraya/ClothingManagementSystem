@@ -3,7 +3,7 @@
 <div class="container my-5">
     <h1 class="text-uppercase mb-4 text-center fw-semibold  mb-3"
         style="letter-spacing:4px; font-family:'Gill Sans MT', Calibri, sans-serif;">
-        Previous Orders
+        My Orders
     </h1>
 
     <div class="row g-4">
@@ -21,7 +21,7 @@
                                          class="card-img-top rounded-2"
                                          style="height:200px; object-fit:contain;" />
                                 </div>
-                                <div class="card-body">
+                                <div class="card-body border-bottom" style="border-color: rgba(108, 117, 125, 0.3);">
                                     <h6 class="fw-semibold text-truncate"
                                         style="font-size:17px; letter-spacing:0.5px;">
                                         @order.Product.ProductName
@@ -32,6 +32,22 @@
                                         <div><i class="bi bi-box-seam"></i> Quantity: @order.Quantity</div>
                                         <div><i class="bi bi-cash"></i> Total: Rs. @order.TotalPrice</div>
                                     </div>
+                                </div>
+                                <div class="p-2 ms-2">
+                                    <h6 style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"> Status:
+                                        @if(order.OrderStatus=="Rejected")
+                                        {
+                                            <span class="text-danger text-uppercase"> @order.OrderStatus  </span>
+                                        }
+                                        else if(order.OrderStatus=="Accepted")
+                                        {
+                                            <span class="text-success text-uppercase"> @order.OrderStatus </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-secondary text-uppercase"> @order.OrderStatus </span>
+                                        }
+                                    </h6>
                                 </div>
                             </div>
                         </div>

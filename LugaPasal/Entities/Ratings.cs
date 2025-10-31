@@ -10,7 +10,7 @@ namespace LugaPasal.Entities
         public int RatingValue { get; set; }
         public string? Review { get; set; }
         public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Now);
-        public Guid ?ProductID { get; set; }
+        public Guid ProductID { get; set; }
         [ForeignKey("ProductID")]
         public Products Product { get; set; } 
         public string ?UserID { get; set; } = string.Empty;

@@ -1,21 +1,5 @@
 ﻿@model List<LugaPasal.Entities.Products>
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @TempData["ErrorMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-
 @if (Model == null || !Model.Any())
 {
     <div class="alert alert-warning text-center shadow-sm rounded-3">
@@ -29,7 +13,13 @@ else
     <div class="container-fluid px-3 py-2">
         <div class="row g-4 " style="min-height:100vh;">
             <!-- Filters Column: Extreme Left -->
-            <div class="col-12 col-md-2">
+            <div class="col-12 col-lg-2 col-md-2">
+                <button class="btn btn-outline-secondary d-lg-none mb-3 w-100"
+                        type="button" data-bs-toggle="collapse"
+                        data-bs-target="#filterCollapse">
+                    <i class="bi bi-funnel"></i> Filters
+                </button>
+                <div class="collapse d-lg-block" id="filterCollapse">
                 <form method="get" enctype="multipart/form-data" asp-action="ListProducts" asp-controller="Product" class="align-self-start">
                     <div class="card p-3 shadow-sm border-0 rounded-4" style="position: sticky; top:120px; background-color: #fdfdfd;">
                         <h5 class="mb-3 border-bottom pb-2 text-secondary fw-semibold">Filters</h5>
@@ -81,6 +71,7 @@ else
                         </div>
                     </div>
                 </form>
+                </div>
             </div>
 
 
@@ -92,7 +83,7 @@ else
                         <div class="col d-flex">
                             <a asp-action="ProductProfile" asp-controller="Product" asp-route-id="@product.ProductID" class="text-decoration-none text-dark">
                                 <div class="hover-shadow" style="border-radius:0.75rem;">
-                                    <div class="card shadow-sm bg-light d-flex flex-column" style="max-width:300px;border:none;">
+                                    <div class="card shadow-sm bg-light d-flex flex-column" style="max-width:300px;border:none;min-height:25rem;">
                                         <div class="card-header bg-white h-100">
                                             <img src="@( !string.IsNullOrEmpty(product.ProductImagePath) ? product.ProductImagePath : Url.Content("~/images/icons/default.jpg") )"
                                                  class="card-img-top rounded-2"
@@ -110,8 +101,8 @@ else
                                         </div>
                                             <div class="card-footer d-flex align-items-center justify-content-center gap-4" style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size:0.95rem; color:#555;">
                                                 <div class="d-flex align-items-center gap-1 px-2 py-1 bg-light rounded-pill">
-                                                    <i class="bi bi-currency-dollar" style="font-size:1rem;"></i>
-                                                    <span>@product.ProductPrice</span>
+
+                                                    <span> NPR @product.ProductPrice</span>
                                                 </div>
                                                 <div class="d-flex align-items-center gap-1 px-2 py-1 bg-light rounded-pill">
                                                     <i class="bi bi-box-seam" style="font-size:1rem;"></i>

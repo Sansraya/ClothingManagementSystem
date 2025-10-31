@@ -52,6 +52,10 @@ namespace LugaPasal.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("OrderStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid?>("ProductID")
                         .HasColumnType("uniqueidentifier");
 
@@ -374,7 +378,7 @@ namespace LugaPasal.Migrations
             modelBuilder.Entity("LugaPasal.Entities.Orders", b =>
                 {
                     b.HasOne("LugaPasal.Entities.Products", "Product")
-                        .WithMany()
+                        .WithMany("Orders")
                         .HasForeignKey("ProductID");
 
                     b.HasOne("LugaPasal.Entities.User", "User")
@@ -465,6 +469,8 @@ namespace LugaPasal.Migrations
 
             modelBuilder.Entity("LugaPasal.Entities.Products", b =>
                 {
+                    b.Navigation("Orders");
+
                     b.Navigation("Ratings");
                 });
 

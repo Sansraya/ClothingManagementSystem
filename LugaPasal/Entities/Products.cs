@@ -23,6 +23,7 @@ namespace LugaPasal.Entities
         public string UserId { get; set; } =string.Empty;
         public User User { get; set; } = null!;
         
+        public ICollection<Orders>?Orders { get; set; }
         public ICollection<Ratings>? Ratings { get; set; }
     }
 }

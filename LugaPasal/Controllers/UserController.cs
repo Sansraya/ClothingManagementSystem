@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Packaging.Signing;
 using System.Data;
+using System.Linq;
 using System.Security.Claims;
 
 
@@ -412,7 +413,7 @@ namespace LugaPasal.Controllers
 
             if (topRatedProductId != null)
             {
-                topRatedProduct = dbContext.Products.FirstOrDefault(p => p.ProductID == topRatedProductId.ProductID.Value);
+                topRatedProduct = dbContext.Products.FirstOrDefault(p => p.ProductID == topRatedProductId.ProductID);
             }
             var LowestRatedProductId = dbContext.Ratings.GroupBy(p => p.ProductID)
                                             .Select(g => new { ProductID = g.Key, AvgRating = g.Average(g => g.RatingValue) })
@@ -422,7 +423,7 @@ namespace LugaPasal.Controllers
             Products LowestRatedProduct = null;
             if (LowestRatedProductId != null)
             {
-                LowestRatedProduct = dbContext.Products.FirstOrDefault(p => p.ProductID == LowestRatedProductId.ProductID.Value);
+                LowestRatedProduct = dbContext.Products.FirstOrDefault(p => p.ProductID == LowestRatedProductId.ProductID);
             }
 
 
@@ -541,20 +542,168 @@ namespace LugaPasal.Controllers
         {
             var user = await userManager.GetUserAsync(User);
 
-            if(user == null)
+            if (user == null)
             {
-                TempData["ErrorMessage"]= "Please login in first!";
+                TempData["ErrorMessage"] = "Please login in first!";
                 return RedirectToAction("Login", "User");
             }
 
             List<Orders> orders = await dbContext.Orders
-                                      .Include(o => o.Product)  
-                                      .Include(o => o.User)     
+                                      .Include(o => o.Product)
+                                      .Include(o => o.User)
                                       .Where(o => o.UserID == user.Id)
                                       .OrderByDescending(o => o.OrderDate)
                                       .ToListAsync();
 
             return View(orders);
         }
-    }   
+        public async Task<IActionResult> GetOrders()
+        {
+            var user = await userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "Please login in first!";
+                return RedirectToAction("Login", "User");
+            }
+
+            var orderedProducts = await dbContext.Products
+                                                            .Where(p => p.UserId == user.Id)
+                                                            .Where(p => p.Orders.Any(o => o.OrderStatus == "Pending")) // filter products with pending orders
+                                                            .Include(p => p.Orders.Where(o => o.OrderStatus == "Pending"))
+                                                                .ThenInclude(o => o.User)
+                                                            .ToListAsync();
+
+            return View(orderedProducts);
+        }
+
+        public async Task<IActionResult> UpdateOrderStatus(Guid Id, string status, Guid productId, int Quantity)
+        {
+            var product = await dbContext.Products.FirstOrDefaultAsync(p => p.ProductID == productId);
+            var order = await dbContext.Orders.FirstOrDefaultAsync(o => o.OrderId == Id);
+            if (order == null)
+            {
+                TempData["ErrorMessage"] = "Order not found!";
+                return RedirectToAction("GetOrders", "User");
+            }
+            if (status == "Accepted")
+            {
+                product.ProductQuantity = product.ProductQuantity - Quantity;
+                dbContext.Products.Update(product);
+            }
+            order.OrderStatus = status;
+            dbContext.Orders.Update(order);
+            await dbContext.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Order status updated successfully!";
+            return RedirectToAction("GetOrders", "User");
+        }
+
+        public async Task<IActionResult> Analytics()
+        {
+            var user = await userManager.GetUserAsync(User);
+            var products = await dbContext.Products.Where(p => p.UserId == user.Id)
+                                                    .ToListAsync();
+            List<Orders>? acceptedOrders = new List<Orders>();
+            var productIds = products.Select(p => p.ProductID).ToList();
+            var lowestRatedProduct = await dbContext.Ratings
+                                                          .Where(r => productIds.Contains(r.ProductID))
+                                                          .OrderBy(r => r.RatingValue)
+                                                          .Include(r => r.Product)
+                                                          .FirstOrDefaultAsync();
+            var highestRatedProduct = await dbContext.Ratings
+                                                    .Where(r => productIds.Contains(r.ProductID))
+                                                    .OrderByDescending(r => r.RatingValue)
+                                                    .Include(r=> r.Product)
+                                                    .FirstOrDefaultAsync();
+            // foreach (var product in products)
+            // {
+            //     var order = await dbContext.Orders.FirstOrDefaultAsync(o => o.ProductID == product.ProductID && o.OrderStatus == "Accepted");
+            //     if (order != null)
+            //     {
+            //         acceptedOrders.Add(order);
+            //     }
+
+            //}
+            acceptedOrders = await dbContext.Orders
+                .Where(o => o.ProductID.HasValue && productIds.Contains(o.ProductID.Value) && o.OrderStatus == "Accepted")
+                 .ToListAsync();
+
+
+            // Highest selling
+            var highestSellingProductId = acceptedOrders
+                .GroupBy(o => o.ProductID)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .FirstOrDefault();
+
+            var highestSellingProduct = acceptedOrders
+                .FirstOrDefault(o => o.ProductID == highestSellingProductId);
+
+            // Lowest selling
+            var lowestSellingProductId = acceptedOrders
+                .GroupBy(o => o.ProductID)
+                .OrderBy(g => g.Count())
+                .Select(g => g.Key)
+                .FirstOrDefault();
+
+            var lowestSellingProduct = acceptedOrders
+                .FirstOrDefault(o => o.ProductID == lowestSellingProductId);
+
+            var totalSales = acceptedOrders.Sum(o => o.TotalPrice);
+
+            var totalSalesPerProduct = acceptedOrders
+                .GroupBy(o => o.ProductID)
+                .Select(g => new
+                {
+                    ProductId = g.Key,
+                    ProductName = products.FirstOrDefault(p => p.ProductID == g.Key).ProductName ,
+                    TotalSales = g.Sum(o => o.TotalPrice)
+                })
+                .ToList<dynamic>();
+
+
+            var stockLevels = products.OrderByDescending(o => o.ProductQuantity)
+                                       .ToList();
+            var TotalOrders = acceptedOrders.Count();
+
+            var reviewsPerProduct = await dbContext.Ratings.Where(r => productIds.Contains(r.ProductID))
+                                                            .GroupBy(r => r.ProductID)
+                                                            .Select(g => new
+                                                            {
+                                                                ProductID = g.Key,
+                                                                TotalReviews = g.Count()
+                                                            })
+                                                            .ToListAsync<dynamic>();
+            var ratingSummary = await dbContext.Ratings
+            .Where(r => productIds.Contains(r.ProductID))
+            .GroupBy(r => r.ProductID)
+            .Select(g => new
+            {
+                ProductId = g.Key,
+                TotalReviews = g.Count(),
+                FiveStarCount = g.Count(r => r.RatingValue == 5),
+                OneStarCount = g.Count(r => r.RatingValue == 1),
+                FiveStarPercent = 100.0 * g.Count(r => r.RatingValue == 5) / g.Count(),
+                OneStarPercent = 100.0 * g.Count(r => r.RatingValue == 1) / g.Count()
+            })
+            .ToListAsync<dynamic>();
+
+            var analyticsModel = new AnalyticsModel
+            {
+                TotalSales = totalSales,
+                TotalOrders = TotalOrders,
+                StockLevels = stockLevels,
+                TotalSalesPerProduct = totalSalesPerProduct,
+                HighestSellingProduct = highestSellingProduct,
+                LowestSellingProduct = lowestSellingProduct,
+                HighestRatedProduct = highestRatedProduct,
+                LowestRatedProduct = lowestRatedProduct,
+                ReviewsPerProduct = reviewsPerProduct,
+                RatingSummary = ratingSummary,
+                AllProducts = products
+            };
+
+            return View(analyticsModel);
+        }
+    }
 }

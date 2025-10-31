@@ -1,12 +1,6 @@
 ﻿@model LugaPasal.Models.ProfileViewModel
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="notifications alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
+
 
 <div class="container-fluid">
     <div class="row p-4 gx-5">
@@ -75,15 +69,6 @@
                             @Model.Rating?.ToString("0.0") / 5
                         </span>
                     </div>
-
-
-                    <!-- Buttons -->
-                    <div class="d-flex justify-content-center align-items-center gap-4 mt-3">
-                        <a asp-controller="User" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Edit</a>
-                        <a asp-controller="User" asp-action="MyOrders" class="btn btn-outline-dark">My Orders</a>
-                        <a asp-controller="User" asp-action="Logout" class="btn btn-outline-danger">Logout</a>
-                    </div>
-
 
                 </div>
             </div>

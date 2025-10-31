@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Identity.Client;
 using System.Threading.Tasks;
 using System.Text.Json;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace LugaPasal.Controllers
 {
@@ -377,20 +378,28 @@ namespace LugaPasal.Controllers
                             TempData["ErrorMessage"] = "One or more products in your cart are no longer available.";
                             return RedirectToAction("Cart", "Product");
                         }
-                        var order = new Orders
+                        if (item.ProductQuantity >= 1)
                         {
-                            OrderId = Guid.NewGuid(),
-                            OrderDate=DateTime.UtcNow,
-                            ProductID = item.ProductID,
-                            UserID = user.Id,
-                            Quantity=product.Quantity,
-                            UnitPrice = item.ProductPrice,
-                            TotalPrice=item.ProductPrice * product.Quantity
-                            
-                        };
-                        item.ProductQuantity = item.ProductQuantity - product.Quantity;
-                        dbContext.Products.Update(item);
-                        await dbContext.Orders.AddAsync(order);
+                            var order = new Orders
+                            {
+                                OrderId = Guid.NewGuid(),
+                                OrderDate = DateTime.UtcNow,
+                                ProductID = item.ProductID,
+                                UserID = user.Id,
+                                Quantity = product.Quantity,
+                                UnitPrice = item.ProductPrice,
+                                TotalPrice = item.ProductPrice * product.Quantity,
+                                OrderStatus = "Pending"
+
+                            };
+                            await dbContext.Orders.AddAsync(order);
+                        }
+                        else
+                        {
+                            TempData["ErrorMessage"] = "This product is out of stock! Sorry, for the inconvenices caused! ";
+                            return RedirectToAction("Cart", "Product");
+                        }
+                        
                     }
                     await dbContext.SaveChangesAsync();
                     HttpContext.Session.Remove("Cart");
@@ -457,6 +466,52 @@ namespace LugaPasal.Controllers
             return RedirectToAction("ProductProfile", new { id = productID });
         }
 
+        public IActionResult ManipulateQuantity(Guid id, string quantityAction)
+        {
+            var sessionCart = HttpContext.Session.GetString("Cart");
+
+            if (string.IsNullOrEmpty(sessionCart))
+                return RedirectToAction("Cart", "Product");
+
+            var cart = JsonSerializer.Deserialize<List<Cart>>(sessionCart);
+            if (cart == null || !cart.Any())
+            {
+                return RedirectToAction("Cart", "Product");
+            }
+
+            var product = cart.FirstOrDefault(p => p.ProductID == id);
+            if (product == null)
+            {
+                return RedirectToAction("Cart", "Product");
+            }
+
+            if (quantityAction == "Increase")
+            {
+                product.Quantity += 1;
+            }
+
+            else if (quantityAction == "Decrease")
+            {
+                if (product.Quantity > 1)
+                {
+                    product.Quantity -= 1;
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Quantity cannot be less than 1.";
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Unable to change the quantity of the product!";
+            }
+
+            HttpContext.Session.SetString("Cart", JsonSerializer.Serialize(cart));
+            return RedirectToAction("Cart", "Product");
+        }
+
     }
+
 }
+
 

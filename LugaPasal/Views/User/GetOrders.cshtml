@@ -1,0 +1,95 @@
+﻿@model List<LugaPasal.Entities.Products>
+
+<div class="container my-5">
+    <h1 class="text-uppercase mb-4 text-center fw-semibold mb-3"
+        style="letter-spacing:4px; font-family:'Gill Sans MT', Calibri, sans-serif;">
+        Pending Orders
+    </h1>
+
+    <div class="row g-4">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var product in Model)
+            {
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <div class="hover-shadow">
+                        <div class="card h-100 shadow-sm border-0">
+
+
+                            <div class="card-header bg-white p-0">
+                                <img src="@( !string.IsNullOrEmpty(product.ProductImagePath) ? product.ProductImagePath : Url.Content("~/images/icons/default.jpg"))"
+                                     class="card-img-top rounded-top"
+                                     style="height:200px; object-fit:contain;" />
+                            </div>
+
+                            <div class="card-body border-bottom border-faded">
+                                <h6 class="text-dark" style="font-size:18px;font-weight:normal;letter-spacing:0.6px;line-height:12px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">@product.ProductName</h6>
+                            </div>
+
+
+                            @if (product.Orders != null && product.Orders.Any())
+                            {
+                                @foreach (var o in product.Orders)
+                                {
+                                    <div class="card-body border-bottom border-faded py-2">
+                                        <div class="small text-muted mb-1">
+                                            <i class="bi bi-calendar-date"></i> @o.OrderDate.ToString("MM/dd/yyyy")
+                                        </div>
+                                        <div class="small text-muted mb-1">
+                                            <i class="bi bi-box-seam"></i> Quantity: @o.Quantity
+                                        </div>
+                                        <div class="small text-muted mb-1">
+                                            <i class="bi bi-cash"></i> Total: Rs. @o.TotalPrice
+                                        </div>
+                                        <div class="small text-primary fw-semibold">
+                                            <a asp-action="ProfileByOthers" asp-controller="User" asp-route-id="@o.UserID" class="text-decoration-none"> <i class="bi bi-person"></i> Requested By: @o.User </a>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="card-footer bg-white border-0 p-3">
+                                        <div class="d-flex gap-2 justify-content-center">
+                                            <a asp-action="UpdateOrderStatus" asp-controller="User" asp-route-Id="@o.OrderId" asp-route-status="Accepted" asp-route-productId="@product.ProductID" asp-route-Quantity="@o.Quantity"
+                                               class="btn border w-50  text-white text-uppercase shadow-sm hover-shadow" style=" font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height:20px;background-color:black;">
+                                                Accept
+                                            </a>
+                                            <a asp-action="UpdateOrderStatus" asp-controller="User" asp-route-Id="@o.OrderId" asp-route-status="Rejected"
+                                               class="btn border w-50 text-white text-uppercase shadow-sm hover-shadow" style=" font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height:20px;background-color:#b02a37;">
+                                                Decline
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                         
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="border rounded shadow-sm p-5 text-center bg-white">
+                    <h6 class="text-muted mb-0">No products to display yet.</h6>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+
+    .border-faded {
+        border-color: rgba(108, 117, 125, 0.3) !important;
+    }
+
+    .card-footer button {
+        border-radius: 25px;
+        font-size: 14px;
+    }
+
+</style>

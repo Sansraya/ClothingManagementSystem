@@ -41,7 +41,7 @@
                             <a class="nav-link text-dark text-uppercase nav-bar-text-left" asp-area="" asp-controller="Product" asp-action="ListProducts">Browse</a>
                         </li>
 
-                        <form asp-action="ListProducts" asp-controller="Product" method="get" class="d-flex w-75 ms-5" style="border-radius:19px/50%;">
+                        <form asp-action="ListProducts" asp-controller="Product" method="get" class="d-flex w-75 ms-5 mt-md-0 ms-md-5" style="border-radius:19px/50%;">
                             <input type="text" name="searchString" style="font-size:13px;border-radius: 19px / 50%;letter-spacing: .4px;  " class="form-control" value="@Context.Request.Query["searchString"]" placeholder="Search for items and products" />
                             <button type="submit" class="btn">
                                 🔍
@@ -53,14 +53,52 @@
                         @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
 
-                            <li class="nav-item">
-                                <a class="nav-link text-dark d-flex align-items-center" asp-action="Profile" asp-controller="User">
-                                    <img class="rounded-circle me-1"
-                                         style="width:30px; height:30px; object-fit:cover;"
-                                         src="~/images/icons/default.jpg" />
-                                    <span style="font-family: 'Poppins', sans-serif; font-weight:400; font-size:0.9rem"> @User.Identity.Name </span>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark d-flex align-items-center" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img class="rounded-circle me-2 shadow-sm"
+                                         style="width:32px; height:32px; object-fit:cover;"
+                                         src="~/images/icons/default.jpg"
+                                         alt="Profile" />
+                                    <span class="d-none d-md-inline" style="font-family: 'Poppins', sans-serif; font-weight:400; font-size:0.9rem;">
+                                        @User.Identity.Name
+                                    </span>
                                 </a>
+
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0"
+                                    aria-labelledby="profileDropdown"
+                                    style="min-width: 200px; border-radius: 0.5rem;">
+
+                                    <li>
+                                        <a class="dropdown-item py-2" asp-action="Profile" asp-controller="User">
+                                            <i class="bi bi-person me-2"></i> Profile
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2" asp-action="MyOrders" asp-controller="User">
+                                            <i class="bi bi-bag me-2"></i> My Orders
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2" asp-action="GetOrders" asp-controller="User">
+                                            <i class="bi bi-bell me-2"></i> Order Requests
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2" asp-action="Analytics" asp-controller="User">
+                                            <i class="bi bi-graph-up me-2"></i> Analytics
+                                        </a>
+                                    </li>
+
+                                    <li><hr class="dropdown-divider"></li>
+
+                                    <li>
+                                        <a class="dropdown-item py-2 text-danger" asp-action="Logout" asp-controller="User">
+                                            <i class="bi bi-box-arrow-right me-2"></i> Logout
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
+
                             <li class="nav-item mx-1 mt-2">
                                 <span class="text-secondary">|</span>
                             </li>
@@ -116,51 +154,69 @@
             @RenderBody()
         </main>
     </div>
-
+    <div class="position-fixed top-0 start-50 translate-middle-x py-3" style="z-index:9999">
+        <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    @TempData["SuccessMessage"]
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div> 
+        </div>
+        <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    @TempData["ErrorMessage"]
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
     <footer class="custom-footer border-top">
-        <div class="bg-white py-4">
+        <div class="py-4" style="background-color:black;">
             <div class="container text-center text-md-start">
                 <div class="row">
                     <div class="col-12 col-md-4 mb-2 mb-md-0">
-                        <span class="text-uppercase" style="letter-spacing:0.6px;">Quick Links</span>
+                        <span class="text-uppercase text-white" style="letter-spacing:0.6px;">Quick Links</span>
                         <div class="d-flex flex-column text-decoration-none">
-                            <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted small"> Home </a>
-                            <a asp-controller="Product" asp-action="ListProducts" class="text-decoration-none text-muted small"> Products </a>
-                            <a asp-controller="User" asp-action="Register" class="text-decoration-none text-muted small"> Register </a>
-                            <a asp-controller="User" asp-action="Login" class="text-decoration-none text-muted small"> Login </a>
+                            <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted small text-special"> Home </a>
+                            <a asp-controller="Product" asp-action="ListProducts" class="text-decoration-none text-muted small text-special"> Products </a>
+                            <a asp-controller="User" asp-action="Register" class="text-decoration-none text-muted small text-special"> Register </a>
+                            <a asp-controller="User" asp-action="Login" class="text-decoration-none text-muted small text-special"> Login </a>
                         </div>
                     </div>
                     <div class="col-12 col-md-4 mb-2 mb-md-0">
-                        <span class="text-uppercase" style="letter-spacing:0.6px;">Products</span>
+                        <span class="text-uppercase text-white" style="letter-spacing:0.6px;">Products</span>
                         <div class="d-flex flex-column">
                             <form asp-action="ListProducts" asp-controller="Product" method="get">
                                 <input type="hidden" name="category" value="Hoodie" />
-                                <button type="submit" style="all:unset;">
-                                    <span class="text-muted small" style="cursor:pointer;"> Hoodie </span>
+                                <button type="submit" class="p-0 m-0 border-0 bg-transparent text-muted small text-special">
+                                    Hoodie
                                 </button>
+
                             </form>
                             <form asp-action="ListProducts" asp-controller="Product" method="get">
                                 <input type="hidden" name="category" value="Shirts" />
-                                <button type="submit" style="all:unset;">
-                                    <span class="text-muted small" style="cursor:pointer;"> Shirts </span>
+                                <button type="submit" class="p-0 m-0 border-0 bg-transparent text-muted small text-special">
+                                    Shirts
                                 </button>
                             </form>
                             <form asp-action="ListProducts" asp-controller="Product" method="get">
                                 <input type="hidden" name="category" value="Pants" />
-                                <button type="submit" style="all:unset;">
-                                    <span class="text-muted small" style="cursor:pointer;"> Pants </span>
+                                <button type="submit" class="p-0 m-0 border-0 bg-transparent text-muted small text-special">
+                                    Pants
                                 </button>
                             </form>
                             <form asp-action="ListProducts" asp-controller="Product" method="get">
                                 <input type="hidden" name="category" value="Bags" />
-                                <button type="submit" style="all:unset;">
-                                    <span class="text-muted small" style="cursor:pointer;"> Bags </span>
+                                <button type="submit" class="p-0 m-0 border-0 bg-transparent text-muted small text-special">
+                                    Bags
                                 </button>
                             </form>
                         </div>
                     </div>
                     <div class="col-12 col-md-4 mb-2 mb-md-0">
-                        <span class="text-uppercase" style="letter-spacing:0.6px;">Contact Us</span>
+                        <span class="text-uppercase text-white" style="letter-spacing:0.6px;">Contact Us</span>
                         <div class="d-flex flex-column">
                             <div class="d-flex gap-1">
                                 <a href="www.instagram.com"><img src="~/images/icons/facebook.png" class="footer-social-icon" /></a>
@@ -181,7 +237,7 @@
 
                 <div class="row mt-4">
                     <div class="col-12 text-center">
-                        <span class="text-muted">&copy; AestheticX 2025 - All Rights Reserved </span>
+                        <span class="text-white">&copy; AestheticX 2025 - All Rights Reserved </span>
 
 
                     </div>
@@ -199,11 +255,32 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+<script>
+    document.addEventListener('DOMContentLoaded' ,function(){ //DOMContentLoaded: waits untill everything is loaded then only executes this function 
+        @if(TempData["SuccessMessage"]!=null)
+    {
+        <text>
+        var successToast= new bootstrap.Toast(document.getElementById("successToast"));
+        successToast.show();
+        </text>
+    }
+    @if(TempData["ErrorMessage"]!=null)
+    {
+        <text>
+        var errorToast= new bootstrap.Toast(document.getElementById("errorToast""));
+        errorToast.show();
+        </text>
+    }
+    });
+</script>
 <style>
     html, body {
         height: 100%;
     }
 
+    .toast {
+        min-width: 300px;
+    }
     .navbar {
         padding-top: 1rem;
         padding-bottom: 1rem;
@@ -274,5 +351,39 @@
         .footer-social-icon:hover {
             opacity: 1;
             transform: translateY(-3px);
+        }
+
+
+    .text-special {
+        transition: 0.3s ease;
+    }
+
+        .text-special:hover {
+            color: #d6d6d6 !important;
+            transform: translateY(-2px);
+        }
+
+    .dropdown-menu {
+        animation: fadeIn 0.2s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .dropdown-item {
+        transition: background-color 0.2s ease;
+    }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
         }
 </style>
