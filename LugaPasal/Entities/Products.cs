@@ -24,6 +24,7 @@ namespace LugaPasal.Entities
         public User User { get; set; } = null!;
         
         public ICollection<Orders>?Orders { get; set; }
+        public ICollection<OrderItems> OrderItems { get; set; }
         public ICollection<Ratings>? Ratings { get; set; }
     }
 }

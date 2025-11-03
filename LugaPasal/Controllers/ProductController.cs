@@ -10,6 +10,7 @@ using Microsoft.Identity.Client;
 using System.Threading.Tasks;
 using System.Text.Json;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.Extensions.Primitives;
 
 namespace LugaPasal.Controllers
 {
@@ -106,7 +107,6 @@ namespace LugaPasal.Controllers
         [HttpGet]
         public async Task<IActionResult> ListProducts(int page, string? searchString, int? minPrice, int? maxPrice, int? quantity, string? category, string? rating)
         {
-
             var usersQuery = dbContext.Products.Include(p => p.User)
                                                 .Include(p => p.Ratings)
                                                 .AsQueryable();
@@ -227,7 +227,11 @@ namespace LugaPasal.Controllers
         [HttpGet]
         public async Task<IActionResult> AddToCart(Guid id)
         {
-
+            var user = await userManager.GetUserAsync(User);
+            if(user ==null)
+            {
+                return RedirectToAction("Login", "User");
+            }
             var product = await dbContext.Products.FindAsync(id);
             if (product == null)
             {
@@ -336,6 +340,12 @@ namespace LugaPasal.Controllers
         public IActionResult Cart()
         {
             var sessionCart = HttpContext.Session.GetString("Cart");
+            var couponSession = HttpContext.Session.GetString("Coupon");
+            if (sessionCart != null && couponSession != null)
+            {
+                var coupon = JsonSerializer.Deserialize<Coupons>(couponSession);
+                ViewBag.Coupon = coupon;
+            }
             var cart = string.IsNullOrEmpty(sessionCart)
                 ? new List<Cart>()
                 : JsonSerializer.Deserialize<List<Cart>>(sessionCart);
@@ -361,18 +371,39 @@ namespace LugaPasal.Controllers
             return RedirectToAction("Cart", "Product");
         }
 
-        public async Task<IActionResult> Checkout()
+        public async Task<IActionResult> Checkout(string couponCode)
         {
             var sessionCart = HttpContext.Session.GetString("Cart");
             var user = await userManager.GetUserAsync(User);
             List<Cart>? cart = JsonSerializer.Deserialize<List<Cart>>(sessionCart);
+            decimal total = cart.Sum(p => p.ProductPrice * p.Quantity);
+            decimal discountedPrice = total;
+            if (!string.IsNullOrEmpty(couponCode))
+            {
+                var coupon = await dbContext.Coupons.FirstOrDefaultAsync(c => c.Code == couponCode);
+                if (coupon != null)
+                {
+                    discountedPrice = total - (total * coupon.DiscountAmount / 100);
+                }
+            }
             if (cart != null && cart.Any())
             {
                 try
                 {
+                    var orderID = Guid.NewGuid();
+                    var order = new Orders
+                    {
+                        OrderId = orderID,
+                        OrderDate = DateTime.UtcNow,
+                        UserID = user.Id,
+                        OrderStatus = "Pending",
+                        OrderTotalPrice= discountedPrice,
+                        Items = new List<OrderItems>()
+                    };
                     foreach (var product in cart)
                     {
-                        var item = await dbContext.Products.FirstAsync(r=> r.ProductID == product.ProductID);
+
+                        var item = await dbContext.Products.FirstAsync(r => r.ProductID == product.ProductID);
                         if (item == null)
                         {
                             TempData["ErrorMessage"] = "One or more products in your cart are no longer available.";
@@ -380,28 +411,33 @@ namespace LugaPasal.Controllers
                         }
                         if (item.ProductQuantity >= 1)
                         {
-                            var order = new Orders
+
+                            var orderItem = new OrderItems
                             {
-                                OrderId = Guid.NewGuid(),
-                                OrderDate = DateTime.UtcNow,
-                                ProductID = item.ProductID,
-                                UserID = user.Id,
+                                OrderItemsId = Guid.NewGuid(),
+                                OrderId = orderID,
+                                ProductID = product.ProductID,
                                 Quantity = product.Quantity,
-                                UnitPrice = item.ProductPrice,
-                                TotalPrice = item.ProductPrice * product.Quantity,
-                                OrderStatus = "Pending"
+                                UnitPrice = product.ProductPrice,
+                                TotalPrice = product.ProductPrice * product.Quantity
 
                             };
-                            await dbContext.Orders.AddAsync(order);
+
+                            order.Items.Add(orderItem);
+                            
                         }
+
                         else
                         {
                             TempData["ErrorMessage"] = "This product is out of stock! Sorry, for the inconvenices caused! ";
                             return RedirectToAction("Cart", "Product");
                         }
-                        
+
                     }
+                  
+                    await dbContext.Orders.AddAsync(order);
                     await dbContext.SaveChangesAsync();
+                    HttpContext.Session.Remove("Coupon");
                     HttpContext.Session.Remove("Cart");
                     TempData["SuccessMessage"] = "Your order has been placed successfully!";
                     return RedirectToAction("ListProducts", "Product");
@@ -509,8 +545,59 @@ namespace LugaPasal.Controllers
             HttpContext.Session.SetString("Cart", JsonSerializer.Serialize(cart));
             return RedirectToAction("Cart", "Product");
         }
+        public async Task<IActionResult> Coupon(String code)
+        {
+            var coupon = await dbContext.Coupons.FirstOrDefaultAsync(c => c.Code == code);
+            if (coupon == null)
+            {
+                TempData["ErrorMessage"] = "Invalid Coupon Code.";
+                return RedirectToAction("Cart", "Product");
+            }
+            if (coupon.ExpiryDate < DateTime.UtcNow)
+            {
+                TempData["ErrorMessage"] = "This coupon has expired.";
+                return RedirectToAction("Cart", "Product");
+            }
+            HttpContext.Session.SetString("Coupon",JsonSerializer.Serialize(coupon));
+            ViewBag.Coupon = coupon;
+            TempData["SuccessMessage"] = $"Coupon applied! You saved {coupon.DiscountAmount}%.";
+            return RedirectToAction("Cart", "Product");
+        }
 
+        [HttpGet]
+        public async Task<IActionResult> AddCoupons()
+        {
+            var allCoupons = await dbContext.Coupons.ToListAsync();
+            return View(allCoupons);
+        }
+        [HttpPost]
+        public async Task<IActionResult> AddCoupons(string Code,decimal DiscountAmount, DateTime ExpiryDate)
+        {
+            var coupons = new Coupons
+            {
+                CouponID = Guid.NewGuid(),
+                Code = Code,
+                DiscountAmount= DiscountAmount,
+                ExpiryDate= ExpiryDate
+            };
+
+            if (ModelState.IsValid)
+            {
+                await dbContext.Coupons.AddAsync(coupons);
+                TempData["SuccessMessage"] = "The coupon has been successfully added into the system!";
+                await dbContext.SaveChangesAsync();
+                return RedirectToAction("AddCoupons", "Product");
+
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Coudn't add the coupon to the system";
+                return RedirectToAction("AddCoupons", "Product");
+            }
+
+        }
     }
+
 
 }
 

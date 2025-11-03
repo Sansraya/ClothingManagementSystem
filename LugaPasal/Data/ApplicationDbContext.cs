@@ -16,5 +16,6 @@ namespace LugaPasal.Data
         public DbSet<Ratings> Ratings { get; set; }
         public DbSet<Favorites> Favorites { get; set; }
         public DbSet<Orders> Orders { get; set; }
+        public DbSet<Coupons> Coupons { get; set; } 
     }
 }

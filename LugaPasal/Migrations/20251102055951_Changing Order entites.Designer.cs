@@ -4,6 +4,7 @@ using LugaPasal.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LugaPasal.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251102055951_Changing Order entites")]
+    partial class ChangingOrderentites
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -106,9 +109,6 @@ namespace LugaPasal.Migrations
                     b.Property<string>("OrderStatus")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("OrderTotalPrice")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid?>("ProductsProductID")
                         .HasColumnType("uniqueidentifier");
@@ -429,7 +429,7 @@ namespace LugaPasal.Migrations
                         .IsRequired();
 
                     b.HasOne("LugaPasal.Entities.Products", "Product")
-                        .WithMany("OrderItems")
+                        .WithMany()
                         .HasForeignKey("ProductID");
 
                     b.Navigation("Order");
@@ -536,8 +536,6 @@ namespace LugaPasal.Migrations
 
             modelBuilder.Entity("LugaPasal.Entities.Products", b =>
                 {
-                    b.Navigation("OrderItems");
-
                     b.Navigation("Orders");
 
                     b.Navigation("Ratings");

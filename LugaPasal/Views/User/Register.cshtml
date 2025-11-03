@@ -3,9 +3,9 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-7 col-lg-6">
-            <div class="card shadow-lg border-0 rounded-4">
+            <div class="card shadow-lg border-0 rounded-4" >
                 <div class="card-header text-center text-white py-4 rounded-top"
-                     style="background: blue;">
+                     style=" background-color: #1e40af; color:white;" >
                     <h2 class="fw-bold mb-0">Create Your Account</h2>
                     <p class="mb-0 text-light small">Join us and start your journey</p>
                 </div>
@@ -69,12 +69,15 @@
                                 <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
                             </div>
 
-                            <div class="col-12 mt-4 text-center">
-                                <button type="submit" class="btn btn-primary w-50 shadow-sm"
-                                        onclick="return confirm('Are you sure the information is correct?');">
-                                    Register
-                                </button>
+                            <div class="row mt-4">
+                                <div class="col-12 text-center">
+                                    <button type="submit" class="btn w-50 shadow-sm hover-shadow p-2" style="background-color: #1e40af; color:white;"
+                                            onclick="return confirm('Are you sure the information is correct?');">
+                                        <span class="text-uppercase fw-semibold" style="font-size:16px;letter-spacing:2px">Register</span>
+                                    </button>
+                                </div>
                             </div>
+
                         </div>
                     </form>
                 </div>
@@ -94,8 +97,8 @@
     }
 
     .form-control:focus {
-        border-color: #6a11cb;
-        box-shadow: 0 0 5px rgba(106, 17, 203, 0.3);
+        border-color: dimgrey;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .card {
@@ -106,4 +109,13 @@
         flex: 1; /* Main grows to fill space */
         margin-bottom: 50px;
     }
+
+    .btn {
+        transition: transform 0.2s ease;
+    }
+
+        .btn:hover {
+            transform: scale(1.02); 
+        }
+
 </style>

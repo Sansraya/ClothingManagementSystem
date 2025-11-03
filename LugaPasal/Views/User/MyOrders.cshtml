@@ -11,48 +11,53 @@
         {
             @foreach (var order in Model)
             {
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                    <a asp-action="ProductProfile" asp-controller="Product" asp-route-id="@order.ProductID"
-                       class="text-decoration-none text-dark">
-                        <div class="hover-shadow">
-                            <div class="card h-100 shadow-sm border-0 ">
-                                <div class="card-header bg-white h-100">
-                                    <img src="@( !string.IsNullOrEmpty(order.Product.ProductImagePath) ? order.Product.ProductImagePath : Url.Content("~/images/icons/default.jpg") )"
-                                         class="card-img-top rounded-2"
-                                         style="height:200px; object-fit:contain;" />
-                                </div>
-                                <div class="card-body border-bottom" style="border-color: rgba(108, 117, 125, 0.3);">
-                                    <h6 class="fw-semibold text-truncate"
-                                        style="font-size:17px; letter-spacing:0.5px;">
-                                        @order.Product.ProductName
-                                    </h6>
+                @foreach (var item in order.Items)
+                {
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <a asp-action="ProductProfile" asp-controller="Product" asp-route-id="@item.ProductID"
+                           class="text-decoration-none text-dark">
+                            <div class="hover-shadow">
+                                <div class="card h-100 shadow-sm border-0 ">
+                                    <div class="card-header bg-white h-100">
+                                        <img src="@( !string.IsNullOrEmpty(item.Product.ProductImagePath) ? item.Product.ProductImagePath : Url.Content("~/images/icons/default.jpg") )"
+                                             class="card-img-top rounded-2"
+                                             style="height:200px; object-fit:contain;" />
+                                    </div>
+                                    <div class="card-body border-bottom" style="border-color: rgba(108, 117, 125, 0.3);">
+                                        <h6 class="fw-semibold text-truncate"
+                                            style="font-size:17px; letter-spacing:0.5px;">
+                                            @item.Product.ProductName
+                                        </h6>
 
-                                    <div class="text-muted small mt-2">
-                                        <div><i class="bi bi-calendar-date"></i> @order.OrderDate.ToString("MM/dd/yyyy")</div>
-                                        <div><i class="bi bi-box-seam"></i> Quantity: @order.Quantity</div>
-                                        <div><i class="bi bi-cash"></i> Total: Rs. @order.TotalPrice</div>
+                                        <div class="text-muted small mt-2">
+                                            <div><i class="bi bi-calendar-date"></i> @order.OrderDate.ToString("MM/dd/yyyy")</div>
+                                            <div><i class="bi bi-box-seam"></i> Quantity: @item.Quantity</div>
+                                            <div><i class="bi bi-cash"></i> Total: Rs. @item.TotalPrice.ToString("N0")</div>
+                                            <div><i class="bi bi-cash"></i> Order Total: Rs. @order.OrderTotalPrice.ToString("N0")</div>
+                                        </div>
+                                    </div>
+                                    <div class="p-2 ms-2">
+                                        <h6 style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">
+                                            Status:
+                                            @if (order.OrderStatus == "Rejected")
+                                            {
+                                                <span class="text-danger text-uppercase"> @order.OrderStatus  </span>
+                                            }
+                                            else if (order.OrderStatus == "Accepted")
+                                            {
+                                                <span class="text-success text-uppercase"> @order.OrderStatus </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-secondary text-uppercase"> @order.OrderStatus </span>
+                                            }
+                                        </h6>
                                     </div>
                                 </div>
-                                <div class="p-2 ms-2">
-                                    <h6 style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"> Status:
-                                        @if(order.OrderStatus=="Rejected")
-                                        {
-                                            <span class="text-danger text-uppercase"> @order.OrderStatus  </span>
-                                        }
-                                        else if(order.OrderStatus=="Accepted")
-                                        {
-                                            <span class="text-success text-uppercase"> @order.OrderStatus </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-secondary text-uppercase"> @order.OrderStatus </span>
-                                        }
-                                    </h6>
-                                </div>
                             </div>
-                        </div>
-                    </a>
-                </div>
+                        </a>
+                    </div>
+                }
             }
         }
         else

@@ -1,0 +1,76 @@
+﻿@model Dictionary<LugaPasal.Entities.User, List<string>>
+
+<div class="container my-5">
+    <div class="border-bottom mb-3 border-1" style="border-color:#9ca3af">
+        <h2 class="text-uppercase text-dark"
+            style="letter-spacing:0.5px;font-family:'Poppins', 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif">
+            All Users
+        </h2>
+    </div>
+
+    <div class="card border-0 shadow-sm overflow-hidden rounded-4">
+        <div class="card-header text-white py-3 px-4" style="background-color: #1e293b; color: #333;" />
+        <div class="row fw-semibold text-uppercase small">
+            <div class="col-md-3 col-12">Name</div>
+            <div class="col-md-3 col-12">Role</div>
+            <div class="col-md-3 col-12">Number</div>
+            <div class="col-md-3 col-12 text-center">Actions</div>
+        </div>
+    </div>
+
+    
+    <div class="card-body bg-white p-0">
+        @foreach (var user in Model)
+        {
+            <div class="row align-items-center px-4 py-3 border-bottom user-row">
+                <div class="col-md-3 col-12 mb-2 mb-md-0">
+                    <span class="fw-semibold text-dark">@user.Key.UserName</span>
+                </div>
+                <div class="col-md-3 col-12 mb-2 mb-md-0">
+                    <span class="text-dark">@string.Join(", ", user.Value)</span>
+                </div>
+                <div class="col-md-3 col-12 mb-2 mb-md-0">
+                    <span class="text-dark">@user.Key.PhoneNumber</span>
+                </div>
+                <div class="col-md-3 col-12 d-flex justify-content-center gap-2">
+                    <a asp-controller="User" asp-action="Edit" asp-route-id="@user.Key.Id" class="btn border w-50 text-uppercase shadow-sm hover-shadow text-white" style=" font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height:20px;background-color:black;"> Edit </a>
+                    <a asp-controller="User" asp-action="DeleteUser" asp-route-id="@user.Key.Id" class="btn border w-50 text-uppercase shadow-sm hover-shadow text-white" style=" font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height:20px;background-color:#d7263d;"> Delete </a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+
+    main {
+        margin-bottom: 150px;
+        margin-top: 50px;
+    }
+
+
+    .user-row {
+        transition: background-color 0.25s ease, transform 0.15s ease;
+    }
+
+        .user-row:hover {
+            background-color: #f9fafc;
+            transform: scale(1.002);
+        }
+
+
+    .btn {
+        transition: all 0.2s ease;
+    }
+
+        .btn:hover {
+           
+            transform: translateY(-1.2px);
+            opacity: 0.95;
+        }
+
+</style>

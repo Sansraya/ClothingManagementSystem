@@ -27,13 +27,13 @@
                             </div>
 
 
-                            @if (product.Orders != null && product.Orders.Any())
+                            @if (product.OrderItems != null && product.OrderItems.Any())
                             {
-                                @foreach (var o in product.Orders)
+                                @foreach (var o in product.OrderItems)
                                 {
                                     <div class="card-body border-bottom border-faded py-2">
                                         <div class="small text-muted mb-1">
-                                            <i class="bi bi-calendar-date"></i> @o.OrderDate.ToString("MM/dd/yyyy")
+                                            <i class="bi bi-calendar-date"></i> @o.Order.OrderDate.ToString("MM/dd/yyyy")
                                         </div>
                                         <div class="small text-muted mb-1">
                                             <i class="bi bi-box-seam"></i> Quantity: @o.Quantity
@@ -41,8 +41,11 @@
                                         <div class="small text-muted mb-1">
                                             <i class="bi bi-cash"></i> Total: Rs. @o.TotalPrice
                                         </div>
+                                        <div class="small text-muted mb-1">
+                                            <i class="bi bi-cash"></i> Order Total: Rs. @o.Order.OrderTotalPrice
+                                        </div>
                                         <div class="small text-primary fw-semibold">
-                                            <a asp-action="ProfileByOthers" asp-controller="User" asp-route-id="@o.UserID" class="text-decoration-none"> <i class="bi bi-person"></i> Requested By: @o.User </a>
+                                            <a asp-action="ProfileByOthers" asp-controller="User" asp-route-id="@o.Order.UserID" class="text-decoration-none"> <i class="bi bi-person"></i> Requested By: @o.Order.User </a>
                                         </div>
                                     </div>
 

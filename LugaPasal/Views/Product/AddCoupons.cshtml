@@ -1,0 +1,73 @@
+﻿@model List<LugaPasal.Entities.Coupons>
+
+<div class="container mt-4">
+
+    
+    <h5 class="text-uppercase border-bottom border-1 border-secondary p-2"
+        style="letter-spacing:4px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif">
+        All Coupons
+    </h5>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4 mt-2 mb-3">
+            @foreach (var coupon in Model)
+            {
+                <div class="col-12 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body">
+                            <h6 class="text-dark fw-bold" style="font-size:18px; letter-spacing:0.6px; line-height:22px;">
+                                @coupon.Code
+                            </h6>
+                            <p class="text-muted mb-1 small">Discount: @coupon.DiscountAmount %</p>
+                            <p class="text-muted mb-1 small">Valid Till: @coupon.ExpiryDate.ToString("MM/dd/yyyy")</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning text-center shadow-sm mt-3">
+            <i class="bi bi-ticket-detailed"></i> No coupons available!
+        </div>
+    }
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">
+                <i class="bi bi-plus-circle me-2 text-success"></i> Add New Coupon
+            </h5>
+
+            <form asp-action="AddCoupons" asp-controller="Product" method="post" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Coupon Code</label>
+                        <input type="text" name="Code" class="form-control" placeholder="e.g. SAVE10" required />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Discount (%)</label>
+                        <input type="number" name="DiscountAmount" class="form-control" min="1" max="100" placeholder="10" required />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Expiry Date</label>
+                        <input type="date" name="ExpiryDate" class="form-control" required />
+                    </div>
+                </div>
+
+                <div class="mt-3 text-end">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save me-2"></i> Save Coupon
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+</style>

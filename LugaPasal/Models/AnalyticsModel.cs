@@ -9,7 +9,8 @@ namespace LugaPasal.Models
         public dynamic ?HighestSellingProduct { get;set; }
         public dynamic?LowestSellingProduct { get; set; }
         public decimal TotalSales { get; set; }
-        public List<dynamic> TotalSalesPerProduct { get; set; } = new();
+        public List<ProductSalesViewModel> TotalSalesPerProduct { get; set; } = new();
+        public List<ProductSalesViewModel> TotalSalesPerProductQuantity { get; set; } = new();
         public List<Products> ?StockLevels { get; set; }
         public int TotalOrders { get; set; }
         public List<dynamic> ?ReviewsPerProduct { get; set; }

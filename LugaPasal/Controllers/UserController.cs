@@ -549,7 +549,8 @@ namespace LugaPasal.Controllers
             }
 
             List<Orders> orders = await dbContext.Orders
-                                      .Include(o => o.Product)
+                                      .Include(o => o.Items)
+                                        .ThenInclude(o=> o.Product)
                                       .Include(o => o.User)
                                       .Where(o => o.UserID == user.Id)
                                       .OrderByDescending(o => o.OrderDate)
@@ -569,9 +570,10 @@ namespace LugaPasal.Controllers
 
             var orderedProducts = await dbContext.Products
                                                             .Where(p => p.UserId == user.Id)
-                                                            .Where(p => p.Orders.Any(o => o.OrderStatus == "Pending")) // filter products with pending orders
-                                                            .Include(p => p.Orders.Where(o => o.OrderStatus == "Pending"))
-                                                                .ThenInclude(o => o.User)
+                                                            .Include(p => p.OrderItems)
+                                                            .ThenInclude(oi => oi.Order)
+                                                            .ThenInclude(o=>o.User)
+                                                            .Where(p => p.OrderItems.Any(oi=> oi.Order.OrderStatus=="Pending"))
                                                             .ToListAsync();
 
             return View(orderedProducts);
@@ -613,7 +615,7 @@ namespace LugaPasal.Controllers
             var highestRatedProduct = await dbContext.Ratings
                                                     .Where(r => productIds.Contains(r.ProductID))
                                                     .OrderByDescending(r => r.RatingValue)
-                                                    .Include(r=> r.Product)
+                                                    .Include(r => r.Product)
                                                     .FirstOrDefaultAsync();
             // foreach (var product in products)
             // {
@@ -625,42 +627,64 @@ namespace LugaPasal.Controllers
 
             //}
             acceptedOrders = await dbContext.Orders
-                .Where(o => o.ProductID.HasValue && productIds.Contains(o.ProductID.Value) && o.OrderStatus == "Accepted")
-                 .ToListAsync();
+                                                .Where(o => o.OrderStatus == "Accepted" && o.Items.Any(oi => productIds.Contains(oi.ProductID)))
+                                                .Include(o => o.Items)
+                                                    .ThenInclude(oi => oi.Product)
+                                                .Include(o => o.User)
+                                                .ToListAsync();
 
 
-            // Highest selling
+
+
             var highestSellingProductId = acceptedOrders
-                .GroupBy(o => o.ProductID)
-                .OrderByDescending(g => g.Count())
-                .Select(g => g.Key)
-                .FirstOrDefault();
+                                .SelectMany(o => o.Items)
+                                .GroupBy(item => item.ProductID)
+                                .OrderByDescending(g => g.Sum(item => item.Quantity))  // ✅ Sum quantities
+                                .Select(g => g.Key)
+                                .FirstOrDefault();
 
-            var highestSellingProduct = acceptedOrders
-                .FirstOrDefault(o => o.ProductID == highestSellingProductId);
-
-            // Lowest selling
             var lowestSellingProductId = acceptedOrders
-                .GroupBy(o => o.ProductID)
-                .OrderBy(g => g.Count())
+                .SelectMany(o => o.Items)
+                .GroupBy(item => item.ProductID)
+                .OrderBy(g => g.Sum(item => item.Quantity))  // ✅ Sum quantities
                 .Select(g => g.Key)
                 .FirstOrDefault();
 
-            var lowestSellingProduct = acceptedOrders
-                .FirstOrDefault(o => o.ProductID == lowestSellingProductId);
+            var highestSellingProduct = dbContext.Products.FirstOrDefault(p => p.ProductID == highestSellingProductId);
+            var lowestSellingProduct = dbContext.Products.FirstOrDefault(p => p.ProductID == lowestSellingProductId);
+            
 
-            var totalSales = acceptedOrders.Sum(o => o.TotalPrice);
+            var totalSales = acceptedOrders.Sum(o => o.OrderTotalPrice);
 
             var totalSalesPerProduct = acceptedOrders
-                .GroupBy(o => o.ProductID)
-                .Select(g => new
-                {
-                    ProductId = g.Key,
-                    ProductName = products.FirstOrDefault(p => p.ProductID == g.Key).ProductName ,
-                    TotalSales = g.Sum(o => o.TotalPrice)
-                })
-                .ToList<dynamic>();
+                                         .SelectMany(o => o.Items)
+                                         .GroupBy(i => i.ProductID)
+                                         .Join(products,                          // Join with products
+                                             g => g.Key,                          //On condition 
+                                             p => p.ProductID,                    
+                                             (g, p) => new ProductSalesViewModel                     
+                                             {
+                                                 ProductId = g.Key,
+                                                 ProductName = p.ProductName,
+                                                 TotalSales = g.Sum(i => i.TotalPrice)
+                                             })
+                                         .OrderByDescending(x => x.TotalSales)
+                                         .ToList();
 
+            var totalSalesPerProductQuantity = acceptedOrders
+                                                .SelectMany(o=>o.Items)
+                                                .GroupBy(i=>i.ProductID)
+                                                .Join(products,
+                                                g => g.Key,                          //On condition 
+                                                p => p.ProductID,                    
+                                             (g, p) => new ProductSalesViewModel
+                                             {
+                                                 ProductId = g.Key,
+                                                 ProductName = p.ProductName,
+                                                 TotalSales = g.Sum(i => i.Quantity)
+                                             })
+                                                .OrderByDescending(g=>g.TotalSales)
+                                                .ToList();
 
             var stockLevels = products.OrderByDescending(o => o.ProductQuantity)
                                        .ToList();
@@ -694,6 +718,7 @@ namespace LugaPasal.Controllers
                 TotalOrders = TotalOrders,
                 StockLevels = stockLevels,
                 TotalSalesPerProduct = totalSalesPerProduct,
+                TotalSalesPerProductQuantity = totalSalesPerProductQuantity,
                 HighestSellingProduct = highestSellingProduct,
                 LowestSellingProduct = lowestSellingProduct,
                 HighestRatedProduct = highestRatedProduct,
@@ -704,6 +729,41 @@ namespace LugaPasal.Controllers
             };
 
             return View(analyticsModel);
+        }
+
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var usersList = await dbContext.Users.OrderBy(u=> u.UserName)
+                                                  .ToListAsync();
+            Dictionary<User,List<string>> userRolesDict = new Dictionary<User, List<string>>();
+            foreach(var a in usersList)
+            {
+                var roles = await userManager.GetRolesAsync(a);
+                userRolesDict.Add(a, roles.ToList())    ;
+
+            }
+            return View(userRolesDict);
+        }
+
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            var user = await userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "User not found!";
+                return RedirectToAction("GetAllUsers", "User");
+            }
+            var result = await userManager.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "User deleted successfully!";
+                return RedirectToAction("GetAllUsers", "User");
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Unable to delete user!";
+                return RedirectToAction("GetAllUsers", "User");
+            }
         }
     }
 }

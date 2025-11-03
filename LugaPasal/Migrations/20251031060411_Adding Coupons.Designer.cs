@@ -4,6 +4,7 @@ using LugaPasal.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LugaPasal.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251031060411_Adding Coupons")]
+    partial class AddingCoupons
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,27 +24,6 @@ namespace LugaPasal.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("LugaPasal.Entities.Coupons", b =>
-                {
-                    b.Property<Guid>("CouponID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("ExpiryDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("CouponID");
-
-                    b.ToTable("Coupons");
-                });
 
             modelBuilder.Entity("LugaPasal.Entities.Favorites", b =>
                 {
@@ -64,36 +46,6 @@ namespace LugaPasal.Migrations
                     b.ToTable("Favorites");
                 });
 
-            modelBuilder.Entity("LugaPasal.Entities.OrderItems", b =>
-                {
-                    b.Property<Guid>("OrderItemsId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ProductID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("OrderItemsId");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("ProductID");
-
-                    b.ToTable("OrderItems");
-                });
-
             modelBuilder.Entity("LugaPasal.Entities.Orders", b =>
                 {
                     b.Property<Guid>("OrderId")
@@ -107,18 +59,24 @@ namespace LugaPasal.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("OrderTotalPrice")
+                    b.Property<Guid?>("ProductID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<Guid?>("ProductsProductID")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("UserID")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("OrderId");
 
-                    b.HasIndex("ProductsProductID");
+                    b.HasIndex("ProductID");
 
                     b.HasIndex("UserID");
 
@@ -420,32 +378,17 @@ namespace LugaPasal.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("LugaPasal.Entities.OrderItems", b =>
-                {
-                    b.HasOne("LugaPasal.Entities.Orders", "Order")
-                        .WithMany("Items")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LugaPasal.Entities.Products", "Product")
-                        .WithMany("OrderItems")
-                        .HasForeignKey("ProductID");
-
-                    b.Navigation("Order");
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("LugaPasal.Entities.Orders", b =>
                 {
-                    b.HasOne("LugaPasal.Entities.Products", null)
+                    b.HasOne("LugaPasal.Entities.Products", "Product")
                         .WithMany("Orders")
-                        .HasForeignKey("ProductsProductID");
+                        .HasForeignKey("ProductID");
 
                     b.HasOne("LugaPasal.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID");
+
+                    b.Navigation("Product");
 
                     b.Navigation("User");
                 });
@@ -529,15 +472,8 @@ namespace LugaPasal.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("LugaPasal.Entities.Orders", b =>
-                {
-                    b.Navigation("Items");
-                });
-
             modelBuilder.Entity("LugaPasal.Entities.Products", b =>
                 {
-                    b.Navigation("OrderItems");
-
                     b.Navigation("Orders");
 
                     b.Navigation("Ratings");
