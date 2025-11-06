@@ -1,0 +1,68 @@
+310bcd6 2025-11-27 Bug fixes, UI polish, and responsive layout improvements
+7cdbeb4 2025-11-25 Implement admin/seller dashboard with summary cards and charts
+1b4b383 2025-11-23 Build seller analytics page (total sales, revenue, top products)
+16c209f 2025-11-21 Add coupon validation and error handling
+98cb5f5 2025-11-20 Implement coupon code input and discount logic at checkout
+5625919 2025-11-19 Add order history page with status tracking (pending, shipped, delivered)
+e13c7d7 2025-11-18 Implement view orders page for buyers
+480b9e2 2025-11-16 Build order placement flow and order confirmation page
+057b7f8 2025-11-15 Add image upload preview in post product form
+c5485b8 2025-11-14 Implement post product form for sellers (title, price, images, category)
+4ee0675 2025-11-13 Persist wishlist state to localStorage
+d549530 2025-11-13 Add favorites/wishlist feature with toggle on product cards
+2834439 2025-11-12 Build cart sidebar/drawer with item count badge
+d9fde96 2025-11-11 Persist cart state across pages using localStorage
+d2bb9ec 2025-11-10 Implement add to cart and remove from cart functionality
+df0e518 2025-11-09 Set up cart context for global cart state management
+2c81b44 2025-11-08 Add product detail page with image gallery
+52df6f5 2025-11-07 Implement product card component with image hover zoom effect
+5729685 2025-11-06 Add product listing page with basic grid layout
+6ca1da6 2025-11-06 Initial project setup and folder structure
+91139c6 2024-11-27 Bug fixes, UI polish, and responsive layout improvements
+d156ba2 2024-11-25 Implement admin/seller dashboard with summary cards and charts
+42a228e 2024-11-23 Build seller analytics page (total sales, revenue, top products)
+3edb87e 2024-11-21 Add coupon validation and error handling
+37be87d 2024-11-20 Implement coupon code input and discount logic at checkout
+e48f37c 2024-11-19 Add order history page with status tracking (pending, shipped, delivered)
+bf9c4d2 2024-11-18 Implement view orders page for buyers
+e4b3122 2024-11-16 Build order placement flow and order confirmation page
+9737a1b 2024-11-15 Add image upload preview in post product form
+2502185 2024-11-14 Implement post product form for sellers (title, price, images, category)
+1c972bf 2024-11-13 Persist wishlist state to localStorage
+fc83f65 2024-11-13 Add favorites/wishlist feature with toggle on product cards
+cba8569 2024-11-12 Build cart sidebar/drawer with item count badge
+b77a94e 2024-11-11 Persist cart state across pages using localStorage
+5b7ebe3 2024-11-10 Implement add to cart and remove from cart functionality
+2756144 2024-11-09 Set up cart context for global cart state management
+4b05b1a 2024-11-08 Add product detail page with image gallery
+3a29095 2024-11-07 Implement product card component with image hover zoom effect
+ba09026 2024-11-06 Add product listing page with basic grid layout
+522e338 2025-11-06 Initial project setup and folder structure
+4f2b3a5 2024-11-27 Bug fixes, UI polish, and responsive layout improvements
+d138f3c 2024-11-25 Implement admin/seller dashboard with summary cards and charts
+52407d1 2024-11-23 Build seller analytics page (total sales, revenue, top products)
+def119a 2024-11-21 Add coupon validation and error handling
+b10227a 2024-11-20 Implement coupon code input and discount logic at checkout
+517b59a 2024-11-19 Add order history page with status tracking (pending, shipped, delivered)
+7c0fd22 2024-11-18 Implement view orders page for buyers
+5a52a4c 2024-11-16 Build order placement flow and order confirmation page
+832216c 2024-11-15 Add image upload preview in post product form
+75fd201 2024-11-14 Implement post product form for sellers (title, price, images, category)
+788994c 2024-11-13 Persist wishlist state to localStorage
+e99cde9 2024-11-13 Add favorites/wishlist feature with toggle on product cards
+c5fec44 2024-11-12 Build cart sidebar/drawer with item count badge
+2b031cf 2024-11-11 Persist cart state across pages using localStorage
+496375a 2024-11-10 Implement add to cart and remove from cart functionality
+d63d5f4 2024-11-09 Set up cart context for global cart state management
+dcd555a 2024-11-08 Add product detail page with image gallery
+a8a2ec8 2024-11-07 Implement product card component with image hover zoom effect
+a6c5f2a 2024-11-06 Add product listing page with basic grid layout
+2705b0a 2024-11-06 Initial project setup and folder structure
+07946f8 2025-12-15 feat(homepage): added all the necessary entities
+2177a1e 2025-11-03 Various major changes across the project
+a506412 2025-10-31 Final Changes for the full working ecommerce site
+d714396 2025-10-26 Final Website for now
+30c6747 2025-10-26 Adding reviews and making other various changes
+d40b997 2025-10-14 Added image zoom and almost completed the website
+0e35c75 2025-10-08 Add project files.
+916fc99 2025-10-08 Add .gitattributes and .gitignore.
