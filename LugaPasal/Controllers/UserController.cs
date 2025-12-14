@@ -1,4 +1,5 @@
-﻿using Humanizer;
+﻿using Azure;
+using Humanizer;
 using LugaPasal.Data;
 using LugaPasal.Entities;
 using LugaPasal.Models;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Packaging.Signing;
 using System.Data;
@@ -538,7 +540,7 @@ namespace LugaPasal.Controllers
             }
 
         }
-        public async Task<IActionResult> MyOrders()
+        public async Task<IActionResult> MyOrders(int page)
         {
             var user = await userManager.GetUserAsync(User);
 
@@ -547,6 +549,21 @@ namespace LugaPasal.Controllers
                 TempData["ErrorMessage"] = "Please login in first!";
                 return RedirectToAction("Login", "User");
             }
+            if (page < 1)
+            {
+                page = 1;
+            }
+            int pageSize = 8;
+
+            int totalOrders = await dbContext.Orders
+                                    .Where(o => o.UserID == user.Id)
+                                    .CountAsync();
+
+            int totalPages = (int)Math.Ceiling(totalOrders / (double)pageSize);
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+
 
             List<Orders> orders = await dbContext.Orders
                                       .Include(o => o.Items)
@@ -554,29 +571,54 @@ namespace LugaPasal.Controllers
                                       .Include(o => o.User)
                                       .Where(o => o.UserID == user.Id)
                                       .OrderByDescending(o => o.OrderDate)
+                                       .Skip((page - 1) * pageSize)
+                                            .Take(pageSize)
                                       .ToListAsync();
 
             return View(orders);
         }
-        public async Task<IActionResult> GetOrders()
+        public async Task<IActionResult> GetOrders(int page)
         {
             var user = await userManager.GetUserAsync(User);
-
             if (user == null)
             {
-                TempData["ErrorMessage"] = "Please login in first!";
+                TempData["ErrorMessage"] = "Please login first!";
                 return RedirectToAction("Login", "User");
             }
 
-            var orderedProducts = await dbContext.Products
-                                                            .Where(p => p.UserId == user.Id)
-                                                            .Include(p => p.OrderItems)
-                                                            .ThenInclude(oi => oi.Order)
-                                                            .ThenInclude(o=>o.User)
-                                                            .Where(p => p.OrderItems.Any(oi=> oi.Order.OrderStatus=="Pending"))
-                                                            .ToListAsync();
+            if (page < 1) page = 1;
+            int pageSize = 8;
 
-            return View(orderedProducts);
+            // Get user's product IDs
+            var userProductIds = await dbContext.Products
+                .Where(p => p.UserId == user.Id)
+                .Select(p => p.ProductID)
+                .ToListAsync();
+
+            // Count total ORDER ITEMS (not orders)
+            int totalOrderItems = await dbContext.Set<OrderItems>()
+                .Where(oi => oi.Order.OrderStatus == "Pending")
+                .Where(oi => userProductIds.Contains(oi.ProductID))
+                .CountAsync();
+
+            int totalPages = (int)Math.Ceiling(totalOrderItems / (double)pageSize);
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+
+            // Fetch paginated ORDER ITEMS
+            var pendingOrderItems = await dbContext.Set<OrderItems>()
+                .Where(oi => oi.Order.OrderStatus == "Pending")
+                .Where(oi => userProductIds.Contains(oi.ProductID))
+                .Include(oi => oi.Product)
+                .Include(oi => oi.Order)
+                    .ThenInclude(o => o.User)
+                .OrderByDescending(oi => oi.Order.OrderDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return View(pendingOrderItems);
         }
 
         public async Task<IActionResult> UpdateOrderStatus(Guid Id, string status, Guid productId, int Quantity)
@@ -690,27 +732,28 @@ namespace LugaPasal.Controllers
                                        .ToList();
             var TotalOrders = acceptedOrders.Count();
 
-            var reviewsPerProduct = await dbContext.Ratings.Where(r => productIds.Contains(r.ProductID))
-                                                            .GroupBy(r => r.ProductID)
-                                                            .Select(g => new
-                                                            {
-                                                                ProductID = g.Key,
-                                                                TotalReviews = g.Count()
-                                                            })
-                                                            .ToListAsync<dynamic>();
+            var reviewsPerProduct = await dbContext.Ratings
+     .Where(r => productIds.Contains(r.ProductID))
+     .GroupBy(r => r.ProductID)
+     .Select(g => new ProductReviewViewModel
+     {
+         ProductID = g.Key,
+         TotalReviews = g.Count()
+     })
+     .ToListAsync();
             var ratingSummary = await dbContext.Ratings
-            .Where(r => productIds.Contains(r.ProductID))
-            .GroupBy(r => r.ProductID)
-            .Select(g => new
-            {
-                ProductId = g.Key,
-                TotalReviews = g.Count(),
-                FiveStarCount = g.Count(r => r.RatingValue == 5),
-                OneStarCount = g.Count(r => r.RatingValue == 1),
-                FiveStarPercent = 100.0 * g.Count(r => r.RatingValue == 5) / g.Count(),
-                OneStarPercent = 100.0 * g.Count(r => r.RatingValue == 1) / g.Count()
-            })
-            .ToListAsync<dynamic>();
+     .Where(r => productIds.Contains(r.ProductID))
+     .GroupBy(r => r.ProductID)
+     .Select(g => new ProductRatingSummaryViewModel
+     {
+         ProductId = g.Key,
+         TotalReviews = g.Count(),
+         FiveStarCount = g.Count(r => r.RatingValue == 5),
+         OneStarCount = g.Count(r => r.RatingValue == 1),
+         FiveStarPercent = 100.0 * g.Count(r => r.RatingValue == 5) / g.Count(),
+         OneStarPercent = 100.0 * g.Count(r => r.RatingValue == 1) / g.Count()
+     })
+     .ToListAsync();
 
             var analyticsModel = new AnalyticsModel
             {

@@ -18,17 +18,15 @@
     <div class="row g-4 mb-4">
         <!-- Total Sales -->
         <div class="col-12 col-md-6 col-lg-3">
-            <div class="hover-shadow">
-                <div class="card border-0 shadow-sm h-100 hover-shadow">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <p class="text-muted mb-1 small">Total Sales</p>
-                                <h3 class="fw-bold mb-0">Rs. @Model.TotalSales.ToString("N2")</h3>
-                            </div>
-                            <div class="stat-icon bg-info bg-opacity-10 text-info">
-                                <i class="bi bi-cash-stack fs-3"></i>
-                            </div>
+            <div class="card border-0 shadow-sm h-100 hover-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">Total Sales</p>
+                            <h3 class="fw-bold mb-0">Rs. @Model.TotalSales.ToString("N2")</h3>
+                        </div>
+                        <div class="stat-icon bg-info bg-opacity-10 text-info">
+                            <i class="bi bi-cash-stack fs-3"></i>
                         </div>
                     </div>
                 </div>
@@ -37,27 +35,26 @@
 
         <!-- Total Orders -->
         <div class="col-12 col-md-6 col-lg-3">
-            <div class="hover-shadow">
-                <div class="card border-0 shadow-sm h-100 hover-shadow">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <p class="text-muted mb-1 small">Total Orders</p>
-                                <h3 class="fw-bold mb-0">@Model.TotalOrders</h3>
-                            </div>
-                            <div class="stat-icon bg-primary bg-opacity-10 text-primary">
-                                <i class="bi bi-bag-fill fs-3"></i>
-                            </div>
+            <a asp-action="AllOrders" asp-controller="Product" class="card border-0 shadow-sm h-100 hover-card text-decoration-none text-dark">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">Total Orders</p>
+                            <h3 class="fw-bold mb-0">@Model.TotalOrders</h3>
+                        </div>
+                        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                            <i class="bi bi-bag-fill fs-3"></i>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <!-- Highest Rated Product -->
         <div class="col-12 col-md-6 col-lg-3">
-            <div class="hover-shadow">
-                <div class="card border-0 shadow-sm h-100 hover-shadow">
+            @if (Model.HighestRatedProduct?.Product != null)
+            {
+                <a asp-controller="Product" asp-action="ProductProfile" asp-route-id="@Model.HighestRatedProduct.Product.ProductID" class="card border-0 shadow-sm h-100 hover-card text-decoration-none text-black">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
@@ -69,14 +66,23 @@
                             </div>
                         </div>
                     </div>
+                </a>
+            }
+            else
+            {
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <span class="text-muted">No highest rated product</span>
+                    </div>
                 </div>
-            </div>
+            }
         </div>
 
         <!-- Lowest Rated Product -->
         <div class="col-12 col-md-6 col-lg-3">
-            <div class="hover-shadow">
-                <div class="card border-0 shadow-sm h-100 hover-shadow">
+            @if (Model.LowestRatedProduct?.Product != null)
+            {
+                <a asp-controller="Product" asp-action="ProductProfile" asp-route-id="@Model.LowestRatedProduct.Product.ProductID" class="card border-0 shadow-sm h-100 hover-card text-decoration-none text-black">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
@@ -88,181 +94,193 @@
                             </div>
                         </div>
                     </div>
+                </a>
+            }
+            else
+            {
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <span class="text-muted">No lowest rated product</span>
+                    </div>
                 </div>
-            </div>
+            }
         </div>
     </div>
 
     <!-- Sales per Product -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="hover-shadow">
-                <div class="card border-0 shadow-sm hover-shadow">
-                    <div class="card-header bg-white border-0 pt-3 d-flex gap-2">
-                        <h5 class="fw-semibold mb-0"><i class="bi bi-bar-chart"></i> Sales Per Product </h5>
-                        <select id="SalesFilter" name="SalesFilter" class="form-select form-select-sm" style="width:10%;">
-                            <option value="Revenue" selected="@(Context.Request.Query["SalesFilter"] == "Revenue")"> Revenue </option>
-                            <option value="Quantity" selected="@(Context.Request.Query["SalesFilter"] == "Quantity")"> Quantity </option>
-                        </select>
-                    </div>
-                    <div class="card-body">
-                        @if (Model.TotalSalesPerProduct != null && Model.TotalSalesPerProduct.Any())
-                        {
-                            <div class="list-group list-group-flush">
-                                @if (Context.Request.Query["SalesFilter"] == "Revenue" || (string.IsNullOrEmpty(Context.Request.Query["SalesFilter"])))
+            <div class="card border-0 shadow-sm hover-card">
+                <div class="card-header bg-white border-0 pt-3 d-flex gap-2 align-items-center">
+                    <h5 class="fw-semibold mb-0"><i class="bi bi-bar-chart"></i> Sales Per Product</h5>
+                    <select id="SalesFilter" name="SalesFilter" class="form-select form-select-sm ms-auto" style="width:150px;">
+                        <option value="Revenue" selected="@(Context.Request.Query["SalesFilter"] == "Revenue")">Revenue</option>
+                        <option value="Quantity" selected="@(Context.Request.Query["SalesFilter"] == "Quantity")">Quantity</option>
+                    </select>
+                </div>
+                <div class="card-body">
+                    @if (Model.TotalSalesPerProduct != null && Model.TotalSalesPerProduct.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @if (Context.Request.Query["SalesFilter"] == "Revenue" || (string.IsNullOrEmpty(Context.Request.Query["SalesFilter"])))
+                            {
+                                @foreach (var item in Model.TotalSalesPerProduct)
                                 {
-                                    @foreach (var item in Model.TotalSalesPerProduct)
-                                    {
-                                        <div class="list-group-item px-0 border-0 d-flex justify-content-between align-items-center">
-                                            <span>@item.ProductName</span>
-                                            <span>Rs. @item.TotalSales</span>
-                                        </div>
-                                    }
+                                    <a asp-controller="Product" asp-action="ProductProfile" asp-route-id="@item.ProductId" class="list-group-item list-group-item-action px-3 py-3 border-0 d-flex justify-content-between align-items-center text-decoration-none text-black rounded-2 mb-1">
+                                        <span class="fw-medium">@item.ProductName</span>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">Rs. @item.TotalSales.ToString("N2")</span>
+                                    </a>
                                 }
-                                else
+                            }
+                            else
+                            {
+                                @foreach (var item in Model.TotalSalesPerProductQuantity)
                                 {
-                                    @foreach (var item in Model.TotalSalesPerProductQuantity)
-                                    {
-                                        <div class="list-group-item px-0 border-0 d-flex justify-content-between align-items-center">
-                                            <span>@item.ProductName</span>
-                                            <span>@item.TotalSales</span>
-                                        </div>
-                                    }
+                                    <a asp-controller="Product" asp-action="ProductProfile" asp-route-id="@item.ProductId" class="list-group-item list-group-item-action px-3 py-3 border-0 d-flex justify-content-between align-items-center text-decoration-none text-black rounded-2 mb-1">
+                                        <span class="fw-medium">@item.ProductName</span>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">@item.TotalSales units</span>
+                                    </a>
                                 }
-                            </div>
-                        }
-                        else
-                        {
-                            <p class="text-muted text-center mb-0">No sales data available</p>
-                        }
-
-                    </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0">No sales data available</p>
+                    }
                 </div>
             </div>
         </div>
     </div>
 
-    
-
     <!-- Top & Lowest Selling Products -->
     <div class="row g-4 mb-4">
         <!-- Highest Selling -->
         <div class="col-12 col-lg-6">
-            <div class="hover-shadow">
-                <div class="card border-0 shadow-sm hover-shadow">
+            @if (Model.HighestSellingProduct != null)
+            {
+                <a asp-controller="Product" asp-action="ProductProfile" asp-route-id="@Model.HighestSellingProduct.ProductID" class="card border-0 shadow-sm h-100 hover-card text-decoration-none text-black">
                     <div class="card-header bg-white border-0 pt-3">
                         <h5 class="fw-semibold mb-0"><i class="bi bi-trophy-fill text-success"></i> Highest Selling Product</h5>
                     </div>
                     <div class="card-body">
-                        @if (Model.HighestSellingProduct != null)
-                        {
-                            <div class="d-flex align-items-center">
-                                <img src="@(!string.IsNullOrEmpty(Model.HighestSellingProduct.ProductName) ? Model.HighestSellingProduct.ProductImagePath : Url.Content("~/images/icons/default.jpg"))"
-                                     class="rounded-3 me-3" style="width: 80px; height: 80px; object-fit: cover;" />
-                                <div>
-                                    <h6 class="fw-semibold mb-1">@Model.HighestSellingProduct.ProductName</h6>
-                                    <p class="text-muted small mb-0">Rs. @Model.HighestSellingProduct.ProductPrice</p>
-                                </div>
+                        <div class="d-flex align-items-center">
+                            <img src="@(!string.IsNullOrEmpty(Model.HighestSellingProduct.ProductImagePath) ? Model.HighestSellingProduct.ProductImagePath : Url.Content("~/images/icons/default.jpg"))"
+                                 class="rounded-3 me-3" style="width: 80px; height: 80px; object-fit: cover;" />
+                            <div>
+                                <h6 class="fw-semibold mb-1">@Model.HighestSellingProduct.ProductName</h6>
+                                <p class="text-muted small mb-0">Rs. @Model.HighestSellingProduct.ProductPrice.ToString("N2")</p>
                             </div>
-                        }
-                        else
-                        {
-                            <p class="text-muted text-center mb-0">No sales available</p>
-                        }
+                        </div>
+                    </div>
+                </a>
+            }
+            else
+            {
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h5 class="fw-semibold mb-0"><i class="bi bi-trophy-fill text-success"></i> Highest Selling Product</h5>
+                    </div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <span class="text-muted">No highest selling product was found!</span>
                     </div>
                 </div>
-            </div>
+            }
         </div>
 
         <!-- Lowest Selling -->
         <div class="col-12 col-lg-6">
-            <div class="hover-shadow">
-                <div class="card border-0 shadow-sm hover-shadow">
+            @if (Model.LowestSellingProduct != null)
+            {
+                <a asp-controller="Product" asp-action="ProductProfile" asp-route-id="@Model.LowestSellingProduct.ProductID" class="card border-0 shadow-sm h-100 hover-card text-decoration-none text-black">
                     <div class="card-header bg-white border-0 pt-3">
                         <h5 class="fw-semibold mb-0"><i class="bi bi-arrow-down-circle-fill text-danger"></i> Lowest Selling Product</h5>
                     </div>
                     <div class="card-body">
-                        @if (Model.LowestSellingProduct != null)
-                        {
-                            <div class="d-flex align-items-center">
-                                <img src="@(!string.IsNullOrEmpty(Model.LowestSellingProduct.ProductImagePath) ? Model.LowestSellingProduct.ProductImagePath : Url.Content("~/images/icons/default.jpg"))"
-                                     class="rounded-3 me-3" style="width: 80px; height: 80px; object-fit: cover;" />
-                                <div>
-                                    <h6 class="fw-semibold mb-1">@Model.LowestSellingProduct.ProductName</h6>
-                                    <p class="text-muted small mb-0">Rs. @Model.LowestSellingProduct.ProductPrice</p>
-                                </div>
+                        <div class="d-flex align-items-center">
+                            <img src="@(!string.IsNullOrEmpty(Model.LowestSellingProduct.ProductImagePath) ? Model.LowestSellingProduct.ProductImagePath : Url.Content("~/images/icons/default.jpg"))"
+                                 class="rounded-3 me-3" style="width: 80px; height: 80px; object-fit: cover;" />
+                            <div>
+                                <h6 class="fw-semibold mb-1">@Model.LowestSellingProduct.ProductName</h6>
+                                <p class="text-muted small mb-0">Rs. @Model.LowestSellingProduct.ProductPrice.ToString("N2")</p>
                             </div>
-                        }
-                        else
-                        {
-                            <p class="text-muted text-center mb-0">No sales available</p>
-                        }
+                        </div>
+                    </div>
+                </a>
+            }
+            else
+            {
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h5 class="fw-semibold mb-0"><i class="bi bi-arrow-down-circle-fill text-danger"></i> Lowest Selling Product</h5>
+                    </div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <span class="text-muted">No lowest selling product was found!</span>
                     </div>
                 </div>
-            </div>
+            }
         </div>
     </div>
 
     <!-- Stock Levels -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="hover-shadow">
-                <div class="card border-0 shadow-sm hover-shadow">
-                    <div class="card-header bg-white border-0 pt-3">
-                        <h5 class="fw-semibold mb-0"><i class="bi bi-box-seam"></i> Stock Levels</h5>
-                    </div>
-                    <div class="card-body">
-                        @if (Model.StockLevels != null && Model.StockLevels.Any())
-                        {
-                            <div class="list-group list-group-flush">
-                                @foreach (var product in Model.StockLevels)
-                                {
-                                    <div class="list-group-item px-0 border-0 d-flex justify-content-between align-items-center">
-                                        <span>@product.ProductName</span>
-                                        <span>@product.ProductQuantity</span>
-                                    </div>
-                                }
-                            </div>
-                        }
-                        else
-                        {
-                            <p class="text-muted text-center mb-0">No stock available</p>
-                        }
-                    </div>
+            <div class="card border-0 shadow-sm hover-card">
+                <div class="card-header bg-white border-0 pt-3">
+                    <h5 class="fw-semibold mb-0"><i class="bi bi-box-seam"></i> Stock Levels</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.StockLevels != null && Model.StockLevels.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var product in Model.StockLevels)
+                            {
+                                <a asp-controller="Product" asp-action="ProductProfile" asp-route-id="@product.ProductID" class="list-group-item list-group-item-action px-3 py-3 border-0 d-flex justify-content-between align-items-center text-decoration-none text-black rounded-2 mb-1">
+                                    <span class="fw-medium">@product.ProductName</span>
+                                    <span class="badge @(product.ProductQuantity < 10 ? "bg-danger" : product.ProductQuantity < 50 ? "bg-warning" : "bg-success") bg-opacity-10 @(product.ProductQuantity < 10 ? "text-danger" : product.ProductQuantity < 50 ? "text-warning" : "text-success") px-3 py-2">
+                                        @product.ProductQuantity units
+                                    </span>
+                                </a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0">No stock available</p>
+                    }
                 </div>
             </div>
         </div>
     </div>
+
     <!-- Reviews Per Product -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="hover-shadow">
-                <div class="card border-0 shadow-sm hover-shadow">
-                    <div class="card-header bg-white border-0 pt-3">
-                        <h5 class="fw-semibold mb-0">
-                            <i class="bi bi-chat-dots-fill text-primary"></i> Reviews Per Product
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        @if (Model.ReviewsPerProduct != null && Model.ReviewsPerProduct.Any())
-                        {
-                            <div class="list-group list-group-flush">
-                                @foreach (var review in Model.ReviewsPerProduct)
-                                {
-                                    <div class="list-group-item px-0 border-0 d-flex justify-content-between align-items-center">
-                                        <span>
-                                            @Model.AllProducts.FirstOrDefault(p => p.ProductID == review.ProductID).ProductName
-                                        </span>
-                                        <span>@review.TotalReviews reviews</span>
-                                    </div>
-                                }
-                            </div>
-                        }
-                        else
-                        {
-                            <p class="text-muted text-center mb-0">No review data available</p>
-                        }
-                    </div>
+            <div class="card border-0 shadow-sm hover-card">
+                <div class="card-header bg-white border-0 pt-3">
+                    <h5 class="fw-semibold mb-0">
+                        <i class="bi bi-chat-dots-fill text-primary"></i> Reviews Per Product
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.ReviewsPerProduct != null && Model.ReviewsPerProduct.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var review in Model.ReviewsPerProduct)
+                            {
+                                <a asp-controller="Product" asp-action="ProductProfile" asp-route-id="@review.ProductID" class="list-group-item list-group-item-action px-3 py-3 border-0 d-flex justify-content-between align-items-center text-decoration-none text-black rounded-2 mb-1">
+                                    <span class="fw-medium">
+                                        @Model.AllProducts.FirstOrDefault(p => p.ProductID == review.ProductID)?.ProductName
+                                    </span>
+                                    <span class="badge bg-info bg-opacity-10 text-info px-3 py-2">@review.TotalReviews reviews</span>
+                                </a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0">No review data available</p>
+                    }
                 </div>
             </div>
         </div>
@@ -271,58 +289,59 @@
     <!-- Rating Summary -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="hover-shadow">
-                <div class="card border-0 shadow-sm hover-shadow">
-                    <div class="card-header bg-white border-0 pt-3">
-                        <h5 class="fw-semibold mb-0">
-                            <i class="bi bi-bar-chart-line-fill text-warning"></i> Rating Summary
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        @if (Model.RatingSummary != null && Model.RatingSummary.Any())
-                        {
-                            <div class="list-group list-group-flush">
-                                @foreach (var item in Model.RatingSummary)
-                                {
-                                    <div class="list-group-item px-0 border-0">
-                                        <div class="d-flex justify-content-between">
-                                            <span>
-                                                @Model.AllProducts.FirstOrDefault(p => p.ProductID == item.ProductId).ProductName
-                                            </span>
-                                            <span>@item.TotalReviews reviews</span>
-                                        </div>
-                                        <div class="mt-2">
-                                            <small class="text-success">5★: @item.FiveStarPercent.ToString("N1")%</small> |
-                                            <small class="text-danger">1★: @item.OneStarPercent.ToString("N1")%</small>
-                                        </div>
+            <div class="card border-0 shadow-sm hover-card">
+                <div class="card-header bg-white border-0 pt-3">
+                    <h5 class="fw-semibold mb-0">
+                        <i class="bi bi-bar-chart-line-fill text-warning"></i> Rating Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RatingSummary != null && Model.RatingSummary.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var item in Model.RatingSummary)
+                            {
+                                <a asp-controller="Product" asp-action="ProductProfile" asp-route-id="@item.ProductId" class="list-group-item list-group-item-action px-3 py-3 border-0 text-decoration-none text-black rounded-2 mb-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-medium">
+                                            @Model.AllProducts.FirstOrDefault(p => p.ProductID == item.ProductId)?.ProductName
+                                        </span>
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2">@item.TotalReviews reviews</span>
                                     </div>
-                                }
-                            </div>
-                        }
-                        else
-                        {
-                            <p class="text-muted text-center mb-0">No rating summary available</p>
-                        }
-                    </div>
+                                    <div>
+                                        <small class="text-success me-2">
+                                            <i class="bi bi-star-fill"></i> 5★: @item.FiveStarPercent.ToString("N1")%
+                                        </small>
+                                        <small class="text-danger">
+                                            <i class="bi bi-star"></i> 1★: @item.OneStarPercent.ToString("N1")%
+                                        </small>
+                                    </div>
+                                </a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mb-0">No rating summary available</p>
+                    }
                 </div>
             </div>
         </div>
     </div>
-
 </div>
+
 <script>
     document.getElementById('SalesFilter').addEventListener('change', function() {
-        const currentUrl = new URL(window.location.href); // Get the current page URL
-        currentUrl.searchParams.set('SalesFilter', this.value);  //Sets the value of parameter
-        window.location.href = currentUrl.toString(); //Refresh The Page 
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('SalesFilter', this.value);
+        window.location.href = currentUrl.toString();
     });
 </script>
+
 <style>
     body {
-        background-color: #f5f5f5;
+        background-color: #f8f9fa;
     }
-
-
 
     .stat-icon {
         width: 60px;
@@ -331,16 +350,79 @@
         justify-content: center;
         align-items: center;
         border-radius: 12px;
+        transition: transform 0.2s ease;
     }
 
-
-    .progress {
-        border-radius: 10px;
-        background-color: #e9ecef;
+    /* Enhanced Card Hover Effect */
+    .hover-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
     }
 
-    .progress-bar {
-        border-radius: 10px;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15) !important;
+        }
+
+            .hover-card:hover .stat-icon {
+                transform: scale(1.1);
+            }
+
+    /* List Item Hover Effect */
+    .list-group-item-action {
+        transition: all 0.2s ease;
+        border-left: 3px solid transparent;
+    }
+
+        .list-group-item-action:hover {
+            background-color: #f8f9fa;
+            border-left-color: #0d6efd;
+            transform: translateX(5px);
+        }
+
+    /* Badge Animation */
+    .badge {
+        transition: all 0.2s ease;
+        font-weight: 600;
+    }
+
+    .list-group-item-action:hover .badge {
+        transform: scale(1.05);
+    }
+
+    /* Smooth Animations */
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    /* Focus States for Accessibility */
+    .hover-card:focus,
+    .list-group-item-action:focus {
+        outline: 2px solid #0d6efd;
+        outline-offset: 2px;
+    }
+
+    /* Select Dropdown Enhancement */
+    #SalesFilter {
+        transition: all 0.2s ease;
+        border-color: #dee2e6;
+    }
+
+        #SalesFilter:hover {
+            border-color: #0d6efd;
+        }
+
+        #SalesFilter:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+        }
+
+    /* Image Enhancement */
+    .card img {
+        transition: transform 0.3s ease;
+    }
+
+    .hover-card:hover img {
+        transform: scale(1.05);
     }
 </style>

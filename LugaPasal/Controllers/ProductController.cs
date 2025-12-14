@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Primitives;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace LugaPasal.Controllers
 {
@@ -105,21 +106,24 @@ namespace LugaPasal.Controllers
         //}
 
         [HttpGet]
-        public async Task<IActionResult> ListProducts(int page, string? searchString, int? minPrice, int? maxPrice, int? quantity, string? category, string? rating)
+        public async Task<IActionResult> ListProducts(int page, string? searchString, int? minPrice, int? maxPrice, int? quantity, string? category, string? rating, string? sortUsers)
         {
             var usersQuery = dbContext.Products.Include(p => p.User)
                                                 .Include(p => p.Ratings)
                                                 .AsQueryable();
 
+            var allUsers = await dbContext.Users.OrderBy(p =>p.UserName)
+                                                .ToListAsync();
+
             bool isFiltering = minPrice != null || maxPrice != null || quantity != null || !string.IsNullOrEmpty(searchString) ||
-                       (!string.IsNullOrEmpty(category) && category != "All") ||
+                       (!string.IsNullOrEmpty(category) && category != "All") || (!string.IsNullOrEmpty(sortUsers) && sortUsers!= "All") ||
                        (!string.IsNullOrEmpty(rating) && rating != "None");
 
             if (!string.IsNullOrEmpty(searchString))
             {
                 usersQuery = usersQuery.Where(p =>
                     p.ProductName.Contains(searchString) ||
-                    p.ProductDescription.Contains(searchString));
+                    p.ProductDescription.Contains(searchString) || p.User.UserName.Contains(searchString));
             }
             if (minPrice != null)
             {
@@ -135,7 +139,14 @@ namespace LugaPasal.Controllers
             }
             if (!string.IsNullOrEmpty(category) && category != "All")
             {
-                usersQuery = usersQuery.Where(p => p.ProductCategory == category);
+                var cat = category.Split(",", StringSplitOptions.RemoveEmptyEntries); //Split the query string by commas, but skip any blanks.
+                usersQuery = usersQuery.Where(p => cat.Contains(p.ProductCategory));
+
+            }
+            if (!string.IsNullOrEmpty(sortUsers) && sortUsers != "All")
+            {
+                var cat = sortUsers.Split(",", StringSplitOptions.RemoveEmptyEntries); //Split the query string by commas, but skip any blanks.
+                usersQuery = usersQuery.Where(p => cat.Contains(p.User.UserName));
 
             }
             if (!string.IsNullOrEmpty(rating) && (rating != "None"))
@@ -160,7 +171,7 @@ namespace LugaPasal.Controllers
                 page = 1;
             }
             int pageSize = 12;
-            var products = await usersQuery.Skip((page - 1) * pageSize)
+            var allProducts = await usersQuery.Skip((page - 1) * pageSize)
                                             .Take(pageSize)
                                             .ToListAsync();
 
@@ -169,24 +180,15 @@ namespace LugaPasal.Controllers
 
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
-            return View(products);
+
+            var listProductsModel = new ListProductsModel
+            {
+                products = allProducts,
+                users = allUsers,
+            };
+
+            return View(listProductsModel);
         }
-
-        //[HttpGet]
-        //public async Task<IActionResult> ListProductsFromSearch(string searchString)
-        //{
-        //    var productsQuery = dbContext.Products
-        //                                 .Include(p => p.User)
-        //                                 .AsQueryable();
-
-
-        //    var products = await productsQuery
-        //                        .OrderByDescending(p => p.ProductID)
-        //                        .ToListAsync();
-
-        //    return View("ListProducts", products); // Reuse same view
-        //}
-
 
 
         [HttpGet]
@@ -595,6 +597,50 @@ namespace LugaPasal.Controllers
                 return RedirectToAction("AddCoupons", "Product");
             }
 
+        }
+
+        public async Task<IActionResult> GetAllProducts(int page)
+        {
+            if(page<1)
+            {
+                page = 1;
+            }
+            int pageSize = 12;
+            var products = await dbContext.Products
+                                          .Include(p => p.User)
+                                          .OrderByDescending(p => p.ProductID)
+                                            .Skip((page - 1) * pageSize)
+                                            .Take(pageSize)
+                                            .ToListAsync();
+
+            int totalProducts = await dbContext.Products.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            
+            return View(products);
+        }
+
+        public async Task<IActionResult> AllOrders(int page)
+        {
+            var user = await userManager.GetUserAsync(User);
+
+            if(page<1)
+            {
+                page = 1;
+            }
+            var productIds = await dbContext.Products.Where(p => p.UserId == (user.Id).ToString()).Select(p=> p.ProductID).ToListAsync();
+
+            List<Orders> listOrders = await dbContext.Orders.Include(o => o.Items)
+                                                                .ThenInclude(oi => oi.Product)
+                                                             .Include(u => u.User)
+                                                             .Where(o => o.Items.Any(i => productIds.Contains(i.ProductID)))
+                                                             .OrderByDescending(o => o.OrderDate)
+                                                             .Skip((page-1)*16)
+                                                             .Take(8)
+                                                             .ToListAsync();
+            return View(listOrders);
         }
     }
 

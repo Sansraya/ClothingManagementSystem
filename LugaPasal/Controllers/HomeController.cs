@@ -4,8 +4,7 @@ using LugaPasal.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace LugaPasal.Controllers
-{
+
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -39,4 +38,4 @@ namespace LugaPasal.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
-}
+

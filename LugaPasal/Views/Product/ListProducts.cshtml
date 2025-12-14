@@ -1,6 +1,6 @@
-﻿@model List<LugaPasal.Entities.Products>
+﻿@model LugaPasal.Models.ListProductsModel
 
-@if (Model == null || !Model.Any())
+@if (Model == null)
 {
     <div class="alert alert-warning text-center shadow-sm rounded-3">
         <strong>No results found.</strong> Try adjusting your search or browse all products.
@@ -9,9 +9,9 @@
 
 else
 {
-  
+
     <div class="container-fluid px-3 py-2">
-        <div class="row g-4 " style="min-height:100vh;">
+        <div class="row g-5" style="min-height:100vh;">
             <!-- Filters Column: Extreme Left -->
             <div class="col-12 col-lg-2 col-md-2">
                 <button class="btn btn-outline-secondary d-lg-none mb-3 w-100"
@@ -20,57 +20,152 @@ else
                     <i class="bi bi-funnel"></i> Filters
                 </button>
                 <div class="collapse d-lg-block" id="filterCollapse">
-                <form method="get" enctype="multipart/form-data" asp-action="ListProducts" asp-controller="Product" class="align-self-start">
-                    <div class="card p-3 shadow-sm border-0 rounded-4" style="position: sticky; top:120px; background-color: #fdfdfd;">
-                        <h5 class="mb-3 border-bottom pb-2 text-secondary fw-semibold">Filters</h5>
-
-                        <!-- Category -->
-                        <div class="mb-3">
-                            <label for="category" class="form-label fw-semibold small text-muted">Category</label>
-                            <select name="category" id="category" class="form-select form-select-sm">
-                                <option value="">All</option>
-                                <option value="Hoodie" selected="@(Context.Request.Query["category"] == "Hoodie")">Hoodie</option>
-                                <option value="Pants" selected="@(Context.Request.Query["category"] == "Pants")">Pants</option>
-                                <option value="Cardigan" selected="@(Context.Request.Query["category"] == "Cardigan")">Cardigan</option>
-                                <option value="Shorts" selected="@(Context.Request.Query["category"] == "Shorts")">Shorts</option>
-                                <option value="Shirts" selected="@(Context.Request.Query["category"] == "Shirts")">Shirts</option>
-                                <option value="Shoes" selected="@(Context.Request.Query["category"] == "Shoes")">Shoes</option>
-                                <option value="Bags" selected="@(Context.Request.Query["category"] == "Bags")">Bags</option>
-                                <option value="TShirt" selected="@(Context.Request.Query["category"] == "TShirt")">T-Shirt</option>
-                            </select>
-                        </div>
-
-                        <!-- Price -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold small text-muted">Price Range</label>
-                            <div class="d-flex gap-2">
-                                <input type="number" name="minPrice" placeholder="Min" value="@(Context.Request.Query["minPrice"])" class="form-control form-control-sm" />
-                                <input type="number" name="maxPrice" placeholder="Max" value="@(Context.Request.Query["maxPrice"])" class="form-control form-control-sm" />
+                    <form method="get" id="categoryForm" enctype="multipart/form-data" asp-action="ListProducts" asp-controller="Product" class="align-self-start">
+                        <div class="card p-3 shadow-sm border-0 rounded-4" style="position: sticky; top:120px; background-color: #fdfdfd;">
+                            <div class="d-flex justify-content-between mb-3 border-bottom border-1">
+                                <h5 class="mb-3 pb-2 text-secondary fw-semibold">Filters</h5>
+                                <a asp-action="ListProducts" asp-controller="Product">
+                                    <i class="bi bi-x-circle-fill text-danger"></i>
+                                </a>
                             </div>
-                        </div>
+                            <div id="category">
+                                <div class="mb-3 d-flex flex-column">
+                                    <div class="d-flex gap-3 align-items-center">
+                                        <label for="category_try" class="form-label fw-semibold small text-muted mb-0" style="font-size:17px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif">Category</label>
 
-                        <!-- Quantity -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold small text-muted">Min Quantity</label>
-                            <input type="number" name="quantity" placeholder="Qty" value="@Context.Request.Query["quantity"]" class="form-control form-control-sm w-100" />
-                        </div>
+                                        <div class="toggle-more mt-1 ms-auto" style="cursor:pointer; font-size:16px;">
+                                            <i id="toggleArrow" class="bi bi-chevron-right"></i>
+                                        </div>
+                                    </div>
 
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold small text-muted"> Rating </label>
-                            <select name="rating" id="rating" class="form-select form-select-sm">
-                                <option value="" selected="@(string.IsNullOrEmpty(Context.Request.Query["rating"]))"> None </option>
-                                <option value="lowRated" selected="@(Context.Request.Query["rating"] == "lowRated")"> Sort Low to High </option>
-                                <option value="highRated" selected="@(Context.Request.Query["rating"] == "highRated")"> Sort High to Low </option>
-                            </select>
-                        </div>
+                                    <label class="d-flex gap-2 ms-2">
+                                        <input type="checkbox" name="category" value="All" @(Context.Request.Query["category"].ToString().Contains("All") ? "checked" : "") class="form-check-input" /> <span class="text-uppercase pt-1" style="font-size:12px;letter-spacing:0.5px; font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> All </span>
+                                    </label>
+                                    <label class="d-flex gap-2 ms-2">
+                                        <input type="checkbox" name="category" value="Hoodie" @(Context.Request.Query["category"].ToString().Contains("Hoodie") ? "checked" : "") class="form-check-input" /> <span class="text-uppercase pt-1" style="font-size:12px;letter-spacing:0.5px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> Hoodie </span>
+                                    </label>
+                                    <label class="d-flex gap-2 ms-2">
+                                        <input type="checkbox" name="category" value="Pants" @(Context.Request.Query["category"].ToString().Contains("Pants") ? "checked" : "") class="form-check-input" /> <span class="text-uppercase pt-1" style="font-size:12px;letter-spacing:0.5px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> Pants </span>
+                                    </label>
 
-                        <!-- Buttons -->
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-secondary w-50 btn-sm">Filter</button>
-                            <a asp-action="ListProducts" asp-controller="Product" class="btn btn-danger w-50 btn-sm">Reset</a>
+                                    <div id="moreCategories" class="collapsed">
+                                        <label class="d-flex gap-2 ms-2">
+                                            <input type="checkbox" name="category" value="Cardigan" @(Context.Request.Query["category"].ToString().Contains("Cardigan") ? "checked" : "") class="form-check-input" /> <span class="text-uppercase pt-1" style="font-size:12px;letter-spacing:0.5px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> Cardigan </span>
+                                        </label>
+                                        <label class="d-flex gap-2 ms-2">
+                                            <input type="checkbox" name="category" value="Shorts" @(Context.Request.Query["category"].ToString().Contains("Shorts") ? "checked" : "") class="form-check-input" />  <span class="text-uppercase pt-1" style="font-size:12px;letter-spacing:0.5px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> Shorts </span>
+                                        </label>
+                                        <label class="d-flex gap-2 ms-2">
+                                            <input type="checkbox" name="category" value="Shirts" @(Context.Request.Query["category"].ToString().Contains("Shirts") ? "checked" : "") class="form-check-input" /> <span class="text-uppercase pt-1" style="font-size:12px;letter-spacing:0.5px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> Shirts </span>
+                                        </label>
+                                        <label class="d-flex gap-2 ms-2">
+                                            <input type="checkbox" name="category" value="Bags" @(Context.Request.Query["category"].ToString().Contains("Bags") ? "checked" : "") class="form-check-input" /> <span class="text-uppercase pt-1" style="font-size:12px;letter-spacing:0.5px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> Bags </span>
+                                        </label>
+                                        <label class="d-flex gap-2 ms-2">
+                                            <input type="checkbox" name="category" value="T-Shirt" @(Context.Request.Query["category"].ToString().Contains("T-Shirt") ? "checked" : "") class="form-check-input" /> <span class="text-uppercase pt-1" style="font-size:12px;letter-spacing:0.5px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> T-Shirt </span>
+                                        </label>
+                                        <label class="d-flex gap-2 ms-2">
+                                            <input type="checkbox" name="category" value="Shoes" @(Context.Request.Query["category"] == "Shoes" ? "checked" : "") class="form-check-input" /> <span class="text-uppercase pt-1" style="font-size:12px;letter-spacing:0.5px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> Shoes </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Category -->
+                            @* <div class="mb-3">
+                                <label for="category" class="form-label fw-semibold small text-muted">Category</label>
+                                <select name="category" id="category" class="form-select form-select-sm">
+                                    <option value="">All</option>
+                                    <option value="Hoodie" selected="@(Context.Request.Query["category"] == "Hoodie")">Hoodie</option>
+                                    <option value="Pants" selected="@(Context.Request.Query["category"] == "Pants")">Pants</option>
+                                    <option value="Cardigan" selected="@(Context.Request.Query["category"] == "Cardigan")">Cardigan</option>
+                                    <option value="Shorts" selected="@(Context.Request.Query["category"] == "Shorts")">Shorts</option>
+                                    <option value="Shirts" selected="@(Context.Request.Query["category"] == "Shirts")">Shirts</option>
+                                    <option value="Shoes" selected="@(Context.Request.Query["category"] == "Shoes")">Shoes</option>
+                                    <option value="Bags" selected="@(Context.Request.Query["category"] == "Bags")">Bags</option>
+                                    <option value="TShirt" selected="@(Context.Request.Query["category"] == "TShirt")">T-Shirt</option>
+                                </select>
+                            </div> *@
+
+                            <!-- Price -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small text-muted mb-0" style="font-size:17px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif">Price Range</label>
+                                <div class="d-flex pt-2 gap-2">
+                                    <input type="number" name="minPrice" placeholder="Min" value="@(Context.Request.Query["minPrice"])" class="form-control form-control-sm" />
+                                    <input type="number" name="maxPrice" placeholder="Max" value="@(Context.Request.Query["maxPrice"])" class="form-control form-control-sm" />
+                                </div>
+                            </div>
+
+                            <!-- Quantity -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small text-muted pb-2 mb-0" style="font-size:17px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> Quantity </label>
+                                <input type="number" name="quantity" placeholder="Qty" value="@Context.Request.Query["quantity"]" class="form-control form-control-sm w-100" />
+                            </div>
+
+                            <div class="mb-3" id="rating">
+                                <label class="form-label fw-semibold small text-muted mb-0" style="font-size:17px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> Rating </label>
+                                <div class="mt-1 d-flex flex-column">
+
+                                    <div class="d-flex gap-2">
+                                        <input type="radio" class="form-check-input" value="" name="rating" @(string.IsNullOrEmpty(Context.Request.Query["rating"]) ? "checked" : "") /> <span class="text-uppercase pt-1" style="font-size:12px;letter-spacing:0.5px; font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> None </span>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <input type="radio" class="form-check-input" value="lowRated" name="rating" @(Context.Request.Query["rating"] == "lowRated" ? "checked" : "") /> <span class="text-uppercase pt-1" style="font-size:12px;letter-spacing:0.5px; font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> Sort Low to High </span>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <input type="radio" class="form-check-input" value="highRated" name="rating" @(Context.Request.Query["rating"] == "highRated" ? "checked" : "") /> <span class="text-uppercase pt-1" style="font-size:12px;letter-spacing:0.5px; font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> Sort High to Low  </span>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="mb-3" id="sortUsers">
+                                <div class="d-flex gap-3 align-items-center">
+                                    <label class="form-label fw-semibold small text-muted mb-0" style="font-size:17px;font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> Users </label>
+                                    @if (Model.users.Count() > 3)
+                                    {
+                                        <div class="toggle-user mt-1 ms-auto" style="cursor:pointer; font-size:16px;">
+                                            <i id="toggleArrow" class="bi bi-chevron-right"></i>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="mt-1 d-flex flex-column">
+                                    <div class="d-flex gap-2">
+                                        <input type="checkbox" name="sortUsers" value="All" @(Context.Request.Query["sortUsers"].ToString().Contains("All") ? "checked" : "") class="form-check-input" /> <span class="text-uppercase pt-1" style="font-size:12px;letter-spacing:0.5px; font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif"> All </span>
+                                    </div>
+                                    @foreach (var user in Model.users.Take(2))
+                                    {
+                                        <div class="d-flex gap-2">
+                                            <input type="checkbox"
+                                                   value="@user.UserName"
+                                                   class="form-check-input"
+                                                   name="sortUsers"
+                                                   @(Context.Request.Query["sortUsers"].ToString().Contains(user.UserName) ? "checked" : "") />
+                                            <span class="text-uppercase pt-1" style="font-size:12px;letter-spacing:0.5px; font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif">
+                                                @user.UserName
+                                            </span>
+                                        </div>
+                                    }
+
+                                    @foreach (var user in Model.users.Skip(2))
+                                    {
+                                        <div class="moreCategoriesUser collapsed">
+                                            <div class="d-flex gap-2">
+                                                <input type="checkbox"
+                                                       value="@user.UserName"
+                                                       class="form-check-input"
+                                                       name="sortUsers"
+                                                       @(Context.Request.Query["sortUsers"].ToString().Contains(user.UserName) ? "checked" : "") />
+                                                <span class="text-uppercase pt-1" style="font-size:12px;letter-spacing:0.5px; font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif">
+                                                    @user.UserName
+                                                </span>
+                                            </div>
+                                        </div>
+                                    }
+
+                                </div>
+                            </div>
+
                         </div>
-                    </div>
-                </form>
+                    </form>
                 </div>
             </div>
 
@@ -78,7 +173,7 @@ else
             <!-- Products Column: Right -->
             <div class="col-12 col-md-10">
                 <div class="row row-cols-1 row-cols-md-4 g-4">
-                    @foreach (var product in Model)
+                    @foreach (var product in Model.products)
                     {
                         <div class="col d-flex">
                             <a asp-action="ProductProfile" asp-controller="Product" asp-route-id="@product.ProductID" class="text-decoration-none text-dark">
@@ -99,20 +194,20 @@ else
                                                 @( string.IsNullOrEmpty(product.ProductDescription) ? "No description has been provided" : product.ProductDescription )
                                             </p>
                                         </div>
-                                            <div class="card-footer d-flex align-items-center justify-content-center gap-4" style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size:0.95rem; color:#555;">
-                                                <div class="d-flex align-items-center gap-1 px-2 py-1 bg-light rounded-pill">
+                                        <div class="card-footer d-flex align-items-center justify-content-center gap-4" style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size:0.95rem; color:#555;">
+                                            <div class="d-flex align-items-center gap-1 px-2 py-1 bg-light rounded-pill">
 
-                                                    <span> NPR @product.ProductPrice</span>
-                                                </div>
-                                                <div class="d-flex align-items-center gap-1 px-2 py-1 bg-light rounded-pill">
-                                                    <i class="bi bi-box-seam" style="font-size:1rem;"></i>
-                                                    <span>@product.ProductQuantity</span>
-                                                </div>
-                                                <p class="card-text text-muted">👤@product.User.UserName</p>
+                                                <span class="text-truncate"> NPR @product.ProductPrice</span>
                                             </div>
+                                            <div class="d-flex align-items-center gap-1 px-2 py-1 bg-light rounded-pill">
+                                                <i class="bi bi-box-seam" style="font-size:1rem;"></i>
+                                                <span>@product.ProductQuantity</span>
+                                            </div>
+                                            <p class="card-text text-muted text-truncate">👤@product.User.UserName</p>
+                                        </div>
 
 
-                                            @* @{
+                                        @* @{
                                             var averageRating = product.Ratings != null && product.Ratings.Any()
                                             ? product.Ratings.Average(r => r.RatingValue)
                                             : 0.0;
@@ -137,7 +232,7 @@ else
                                             }
                                             <span class="ms-2 text-muted"> @averageRating.ToString("0.0")/5 </span>
                                         </div> *@
-                                        
+
 
 
                                     </div>
@@ -162,6 +257,7 @@ else
                                asp-route-maxPrice="@Context.Request.Query["maxPrice"]"
                                asp-route-quantity="@Context.Request.Query["quantity"]"
                                asp-route-category="@Context.Request.Query["category"]"
+                               asp-route-sortUsers="@Context.Request.Query["sortUsers"]"
                                asp-route-rating="@Context.Request.Query["rating"]">
                                 <i class="bi bi-chevron-left"></i>
                             </a>
@@ -180,6 +276,7 @@ else
                                    asp-route-maxPrice="@Context.Request.Query["maxPrice"]"
                                    asp-route-quantity="@Context.Request.Query["quantity"]"
                                    asp-route-category="@Context.Request.Query["category"]"
+                                   asp-route-sortUsers="@Context.Request.Query["sortUsers"]"
                                    asp-route-rating="@Context.Request.Query["rating"]">
                                     @i
                                 </a>
@@ -196,6 +293,7 @@ else
                                asp-route-maxPrice="@Context.Request.Query["maxPrice"]"
                                asp-route-quantity="@Context.Request.Query["quantity"]"
                                asp-route-category="@Context.Request.Query["category"]"
+                               asp-route-sortUsers="@Context.Request.Query["sortUsers"]"
                                asp-route-rating="@Context.Request.Query["rating"]">
                                 <i class="bi bi-chevron-right"></i>
                             </a>
@@ -207,42 +305,116 @@ else
         </div>
 
     </div>
+    <script>
 
+        document.querySelectorAll("#category input[type='checkbox']").forEach(btn=>
+        {
+            btn.addEventListener("change",()=>
+            {
+                const checked = Array.from(document.querySelectorAll("#category input[type='checkbox']:checked")).map(c=> c.value);  //check bhako box le ani array ma convert ra actual value button lai assign gar
+                const currentUrl = new URL(window.location.href);
+                if(checked.length>0){
+                    currentUrl.searchParams.set("category",checked.join(","));
+                }
+                else{
+                    currentUrl.searchParams.delete("category");
+                }
+                window.location.href=currentUrl.toString();
+            });
+        });
+
+        const toggleBtn = document.querySelector(".toggle-more");
+        const moreCat= document.getElementById("moreCategories");
+
+        toggleBtn.addEventListener("click",()=>{
+            moreCat.classList.toggle("expanded");
+            moreCat.classList.toggle("collapsed");
+              toggleBtn.classList.toggle("open");
+              localStorage.setItem("moreCatOpen",moreCat.classList.contains("expanded")? "1":"0");
+        });
+
+
+          const toggleBtnUsers = document.querySelector(".toggle-user");
+        const moreCatUser= document.querySelectorAll(".moreCategoriesUser");
+
+        toggleBtnUsers.addEventListener("click",()=>{
+            moreCatUser.forEach(div => {
+                   div.classList.toggle("collapsed");
+                   div.classList.toggle("expanded");
+                     });
+                     toggleBtnUsers.classList.toggle("open");
+                          const anyExpanded = Array.from(moreCatUser).some(div => div.classList.contains("expanded"));
+                            localStorage.setItem("moreCatOpenUser", anyExpanded ? "1" : "0");
+        });
+
+
+        document.querySelectorAll("#rating input[type='radio']").forEach(btn =>
+        {
+            btn.addEventListener('change',()=>
+            {
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set("rating",btn.value);
+                window.location.href=currentUrl.toString();
+            });
+        });
+
+        document.querySelectorAll("#sortUsers input[type='checkbox']").forEach(btn =>
+            {
+            btn.addEventListener("change",() =>{
+                const arr= Array.from(document.querySelectorAll("#sortUsers input[type='checkbox']:checked")).map(c=>c.value);
+                const currentUrl = new URL(window.location.href);
+                if(arr.length>0)
+                {
+                    currentUrl.searchParams.set("sortUsers",arr.join(","));
+                }
+                else{
+                    currentUrl.searchParams.delete("sortUsers");
+                }
+                window.location.href=currentUrl.toString();
+            });
+        });
+
+
+               window.addEventListener("DOMContentLoaded", () => {
+            if (localStorage.getItem("moreCatOpen") === "1") {
+                moreCat.classList.add("expanded");
+                moreCat.classList.remove("collapsed");
+                toggleBtn.classList.add("open");
+            } else {
+                moreCat.classList.remove("expanded");
+                moreCat.classList.add("collapsed");
+                toggleBtn.classList.remove("open");
+            }
+
+            if (localStorage.getItem("moreCatOpenUser") === "1") {
+                moreCatUser.forEach(div => {
+                    div.classList.add("expanded");
+                    div.classList.remove("collapsed");
+                });
+                toggleBtnUsers.classList.add("open");
+            } else {
+                moreCatUser.forEach(div => {
+                    div.classList.remove("expanded");
+                    div.classList.add("collapsed");
+                });
+                toggleBtnUsers.classList.remove("open");
+            }
+        });
+
+
+
+    </script>
 }
 
 <style>
 
 
 
-    .pagination .page-item .page-link {
-        color: #555;
-        border-radius: 10px;
-        margin: 0 4px;
-        transition: all 0.2s ease-in-out;
-        font-size: 0.95rem;
-    }
 
-
-        .pagination .page-item .page-link:hover {
-            background-color: #212529;
-            color: #fff;
-            transform: translateY(-2px);
-        }
-
-    .pagination .page-item.active .page-link {
-        background-color: #212529 !important;
-        border-color: transparent;
-        color: #fff !important;
-    }
-
-    .pagination .page-item.disabled .page-link {
-        opacity: 0.5;
-        pointer-events: none;
-    }
 
     body > div.container {
         max-width: 100% !important;
-        padding-left: 3rem !important;
+        padding-left: 2rem !important;
         padding-right: 5rem !important;
     }
 
@@ -257,5 +429,65 @@ else
     body {
         background-color: #f5f5f5;
     }
+
+    #category .d-flex,
+    #sortUsers .d-flex {
+        transition: background-color 0.2s ease, transform 0.15s ease;
+    }
+
+        #category .d-flex:hover {
+            transform: translateX(1px);
+        }
+
+    #category input[type="checkbox"],
+    #sortUsers input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    #category span,
+    #sortUsers span {
+        color: #333;
+        user-select: none;
+        cursor: pointer;
+        font-weight: 400;
+    }
+
+        #category span:hover,
+        #sortUsers span:hover {
+            color: #4a6cf7;
+        }
+
+    #category label span,
+    #sortUsers label span {
+        cursor: pointer;
+    }
+
+    #moreCategories,
+    .moreCategoriesUser {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease, opacity 0.5s ease;
+    }
+
+        #moreCategories.expanded,
+        .moreCategoriesUser.expanded {
+            max-height: 1000px;
+            opacity: 1;
+        }
+
+    .toggle-more,
+    .toggle-user i {
+        display: inline-block;
+        transition: transform 0.25s ease;
+    }
+
+        /* Rotate arrow when open */
+        .toggle-more.open i,
+        .toggle-user.open i {
+            transform: rotate(90deg);
+        }
 
 </style>

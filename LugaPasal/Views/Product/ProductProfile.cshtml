@@ -130,16 +130,17 @@
                     <a asp-action="EditProduct" asp-controller="Product" asp-route-id="@Model.product.ProductID" class="btn border w-50 text-uppercase shadow-sm mt-3 hover-shadow" style=" font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height: 20px; background-color:floralwhite"> Edit Product → </a>
                 </div>
             }
+            else
+            {
+                <div class="d-flex justify-content-center">
+                    <a asp-action="ListProducts" asp-controller="Product" class="btn border w-50 text-uppercase shadow-sm mt-3  hover-shadow" style=" font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height:20px;background-color:beige;">
+                        ← Back to Products
+                    </a>
+                    <a asp-controller="Product" asp-action="AddToCart" asp-route-id="@Model.product.ProductID" class="btn border-1 w-50 text-uppercase shadow-sm mt-3 hover-shadow bg-black text-white " style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height: 20px;"> Add to Cart  </a>
+                </div>
+            }
         }
-        else
-        {
-            <div class="d-flex justify-content-center">
-                <a asp-action="ListProducts" asp-controller="Product" class="btn border w-50 text-uppercase shadow-sm mt-3  hover-shadow" style=" font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height:20px;background-color:beige;">
-                    ← Back to Products
-                </a>
-                <a asp-controller="Product" asp-action="AddToCart" asp-route-id="@Model.product.ProductID" class="btn border-1 w-50 text-uppercase shadow-sm mt-3 hover-shadow bg-black text-white " style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height: 20px;"> Add to Cart  </a>
-            </div>
-        }
+      
 
 
     </div>

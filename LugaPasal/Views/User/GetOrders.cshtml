@@ -1,4 +1,4 @@
-﻿@model List<LugaPasal.Entities.Products>
+﻿@model List<LugaPasal.Entities.OrderItems>
 
 <div class="container my-5">
     <h1 class="text-uppercase mb-4 text-center fw-semibold mb-3"
@@ -9,62 +9,63 @@
     <div class="row g-4">
         @if (Model != null && Model.Any())
         {
-            @foreach (var product in Model)
+            @foreach (var item in Model)
             {
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                     <div class="hover-shadow">
                         <div class="card h-100 shadow-sm border-0">
-
-
                             <div class="card-header bg-white p-0">
-                                <img src="@( !string.IsNullOrEmpty(product.ProductImagePath) ? product.ProductImagePath : Url.Content("~/images/icons/default.jpg"))"
+                                <img src="@(!string.IsNullOrEmpty(item.Product.ProductImagePath) ? item.Product.ProductImagePath : Url.Content("~/images/icons/default.jpg"))"
                                      class="card-img-top rounded-top"
                                      style="height:200px; object-fit:contain;" />
                             </div>
 
                             <div class="card-body border-bottom border-faded">
-                                <h6 class="text-dark" style="font-size:18px;font-weight:normal;letter-spacing:0.6px;line-height:12px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">@product.ProductName</h6>
+                                <h6 class="text-dark" style="font-size:18px;font-weight:normal;letter-spacing:0.6px;line-height:12px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                                    @item.Product.ProductName
+                                </h6>
                             </div>
 
+                            <div class="card-body border-bottom border-faded py-2">
+                                <div class="small text-muted mb-1">
+                                    <i class="bi bi-calendar-date"></i> @item.Order.OrderDate.ToString("MM/dd/yyyy")
+                                </div>
+                                <div class="small text-muted mb-1">
+                                    <i class="bi bi-box-seam"></i> Quantity: @item.Quantity
+                                </div>
+                                <div class="small text-muted mb-1">
+                                    <i class="bi bi-cash"></i> Total: Rs. @item.TotalPrice
+                                </div>
+                                <div class="small text-muted mb-1">
+                                    <i class="bi bi-cash"></i> Order Total: Rs. @item.Order.OrderTotalPrice
+                                </div>
+                                <div class="small text-primary fw-semibold">
+                                    <a asp-action="ProfileByOthers" asp-controller="User" asp-route-id="@item.Order.UserID" class="text-decoration-none">
+                                        <i class="bi bi-person"></i> Requested By: @item.Order.User.UserName
+                                    </a>
+                                </div>
+                            </div>
 
-                            @if (product.OrderItems != null && product.OrderItems.Any())
-                            {
-                                @foreach (var o in product.OrderItems)
-                                {
-                                    <div class="card-body border-bottom border-faded py-2">
-                                        <div class="small text-muted mb-1">
-                                            <i class="bi bi-calendar-date"></i> @o.Order.OrderDate.ToString("MM/dd/yyyy")
-                                        </div>
-                                        <div class="small text-muted mb-1">
-                                            <i class="bi bi-box-seam"></i> Quantity: @o.Quantity
-                                        </div>
-                                        <div class="small text-muted mb-1">
-                                            <i class="bi bi-cash"></i> Total: Rs. @o.TotalPrice
-                                        </div>
-                                        <div class="small text-muted mb-1">
-                                            <i class="bi bi-cash"></i> Order Total: Rs. @o.Order.OrderTotalPrice
-                                        </div>
-                                        <div class="small text-primary fw-semibold">
-                                            <a asp-action="ProfileByOthers" asp-controller="User" asp-route-id="@o.Order.UserID" class="text-decoration-none"> <i class="bi bi-person"></i> Requested By: @o.Order.User </a>
-                                        </div>
-                                    </div>
-
-
-                                    <div class="card-footer bg-white border-0 p-3">
-                                        <div class="d-flex gap-2 justify-content-center">
-                                            <a asp-action="UpdateOrderStatus" asp-controller="User" asp-route-Id="@o.OrderId" asp-route-status="Accepted" asp-route-productId="@product.ProductID" asp-route-Quantity="@o.Quantity"
-                                               class="btn border w-50  text-white text-uppercase shadow-sm hover-shadow" style=" font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height:20px;background-color:black;">
-                                                Accept
-                                            </a>
-                                            <a asp-action="UpdateOrderStatus" asp-controller="User" asp-route-Id="@o.OrderId" asp-route-status="Rejected"
-                                               class="btn border w-50 text-white text-uppercase shadow-sm hover-shadow" style=" font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height:20px;background-color:#b02a37;">
-                                                Decline
-                                            </a>
-                                        </div>
-                                    </div>
-                                }
-                            }
-                         
+                            <div class="card-footer bg-white border-0 p-3">
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <a asp-action="UpdateOrderStatus" asp-controller="User"
+                                       asp-route-Id="@item.OrderId"
+                                       asp-route-status="Accepted"
+                                       asp-route-productId="@item.ProductID"
+                                       asp-route-Quantity="@item.Quantity"
+                                       class="btn border w-50 text-white text-uppercase shadow-sm hover-shadow"
+                                       style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height:20px;background-color:black;">
+                                        Accept
+                                    </a>
+                                    <a asp-action="UpdateOrderStatus" asp-controller="User"
+                                       asp-route-Id="@item.OrderId"
+                                       asp-route-status="Rejected"
+                                       class="btn border w-50 text-white text-uppercase shadow-sm hover-shadow"
+                                       style="font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-size: 13px;line-height:20px;background-color:#b02a37;">
+                                        Decline
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -79,20 +80,40 @@
             </div>
         }
     </div>
+
+    <nav aria-label="Product pagination" class="mt-5">
+        <ul class="pagination justify-content-center flex-wrap rounded-4 py-2 px-3">
+
+            <!-- Previous Button -->
+            <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                <a class="page-link border-0 text-secondary"
+                   asp-action="GetOrders"
+                   asp-route-page="@(ViewBag.CurrentPage - 1)">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+
+            <!-- Numbered Pages -->
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                    <a class="page-link border-0 fw-semibold @(ViewBag.CurrentPage == i ? "text-white bg-dark" : "text-secondary")"
+                       style="border-radius: 8px;"
+                       asp-action="GetOrders"
+                       asp-route-page="@i">
+                        @i
+                    </a>
+                </li>
+            }
+
+            <!-- Next Button -->
+            <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                <a class="page-link border-0 text-secondary"
+                   asp-action="GetOrders"
+                   asp-route-page="@(ViewBag.CurrentPage + 1)">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
 </div>
-
-<style>
-    body {
-        background-color: #f5f5f5;
-    }
-
-    .border-faded {
-        border-color: rgba(108, 117, 125, 0.3) !important;
-    }
-
-    .card-footer button {
-        border-radius: 25px;
-        font-size: 14px;
-    }
-
-</style>
